@@ -1,0 +1,6 @@
+#
+# Defines the class of Launcher to use for each class of Application.
+#
+
+# Use the LocalJDKLauncher for JDKApplications on the LocalMachine
+build.spawn.jdk.JDKApplication=build.spawn.platform.local.jdk.LocalJDKLauncher

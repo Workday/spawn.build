@@ -1,0 +1,6 @@
+#
+# Defines the class of Launcher to use for each class of Application.
+#
+
+# for anything else, use the LocalLauncher
+build.spawn.application.Application=build.spawn.platform.local.LocalLauncher
