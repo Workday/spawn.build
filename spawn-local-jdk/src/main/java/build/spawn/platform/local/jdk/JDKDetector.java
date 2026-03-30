@@ -20,17 +20,14 @@ package build.spawn.platform.local.jdk;
  * #L%
  */
 
-import build.base.flow.CompletingSubscriber;
+import build.base.foundation.Exceptional;
 import build.base.logging.Logger;
 import build.base.option.JDKVersion;
-import build.spawn.application.Application;
-import build.spawn.application.Console;
-import build.spawn.application.option.Argument;
-import build.spawn.application.option.StandardErrorSubscriber;
 import build.spawn.jdk.JDK;
 import build.spawn.jdk.option.JDKHome;
-import build.spawn.platform.local.LocalMachine;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -45,6 +42,20 @@ import java.util.stream.Stream;
  * @since Nov-2019
  */
 public interface JDKDetector {
+
+    /**
+     * Obtains a {@link Stream} of candidate {@link java.nio.file.Path}s for {@link JDK} installations,
+     * based on OS-specific glob patterns — without launching any subprocesses to verify them.
+     * <p>
+     * This is the cheap, fast phase of detection. Callers that only need to know whether any
+     * {@link JDK}s are likely present (e.g. capability checks) should prefer this over
+     * {@link #detect()}, which reads each candidate's {@code release} metadata file.
+     *
+     * @return a {@link Stream} of candidate {@link java.nio.file.Path}s
+     */
+    default Stream<Path> paths() {
+        return Stream.empty();
+    }
 
     /**
      * Obtains a {@link Stream} of the available {@link JDK}s.
@@ -83,16 +94,16 @@ public interface JDKDetector {
     }
 
     /**
-     * Attempts to create {@link JDK} based on the specified {@link Path} to Java Home by testing its availability
-     * and that it's operational.
+     * Attempts to create a {@link JDK} for the specified {@link Path} to a Java Home by reading its
+     * {@code release} metadata file.
      * <p>
-     * Should specified {@link Path} refer to a Java Runtime Environment (JRE), and attempt will be made to
+     * Should the specified {@link Path} refer to a Java Runtime Environment (JRE), an attempt will be made to
      * locate the {@link JDK} based on the specified {@link Path}.
      *
      * @param path the {@link Path}
-     * @return the {@link Optional} operational and available {@link JDK}, otherwise {@link Optional#empty()}
+     * @return the {@link Exceptional} {@link JDK}, otherwise {@link Exceptional#empty()}
      */
-    static Optional<JDK> of(final Path path) {
+    static Exceptional<JDK> of(final Path path) {
         final var LOGGER = Logger.get(JDKDetector.class);
 
         // use provided path as the basis of the JDK location
@@ -100,7 +111,7 @@ public interface JDKDetector {
 
         // ensure the path exists
         if (!home.toFile().exists()) {
-            return Optional.empty();
+            return Exceptional.empty();
         }
 
         if (home.endsWith("jre")) {
@@ -110,105 +121,47 @@ public interface JDKDetector {
 
         if (!home.resolve("bin/java").toFile().exists()) {
             LOGGER.warn("The JDK Home [{0}] does not contain bin/java", home);
-            return Optional.empty();
+            return Exceptional.empty();
         }
 
-        // attempt to execute "java -version" on the LocalMachine to prove that it's installed and detect the version
-        final var machine = LocalMachine.get();
-        final var executable = home.resolve("bin/java").toString();
+        // read the release file to determine the JDK version — no subprocess needed
+        final Path releaseFile = home.resolve("release");
+        if (!releaseFile.toFile().exists()) {
+            LOGGER.warn("The JDK Home [{0}] does not contain a release file", home);
+            return Exceptional.empty();
+        }
 
-        // a Pattern to match the java version line output by java
-        final var VERSION = Pattern.compile("(?:java|openjdk) version \"(.+?)\".*");
-        final var subscriber = new CompletingSubscriber<String>();
-        final var version = subscriber.when(line -> VERSION.matcher(line).matches());
+        // a Pattern to match JAVA_VERSION="..." in the release file
+        final var VERSION = Pattern.compile("JAVA_VERSION=\"(.+?)\"");
 
-        try (Application application = machine.launch(executable,
-            Argument.of("-version"),
-            StandardErrorSubscriber.of(subscriber))) {
+        try {
+            final var releaseContent = Files.readString(releaseFile);
+            final var matcher = VERSION.matcher(releaseContent);
 
-            // wait for the application to terminate
-            application.onExit()
-                .join();
+            if (matcher.find()) {
+                final var javaVersion = JDKVersion.of(matcher.group(1));
+                final var javaHome = JDKHome.of(home.toString());
 
-            // iff we detected a version can we create a JDK
-            if (version.isDone() && !version.isCompletedExceptionally() && !version.isCancelled()) {
-                // determine the captured JavaVersion
-                final var matcher = VERSION.matcher(version.get());
-
-                // ensure (again) that it's matched
-                if (matcher.matches()) {
-                    //establish the JDK based on the home and version
-                    final var javaVersion = JDKVersion.of(matcher.group(1));
-                    final var javaHome = JDKHome.of(home.toString());
-
-                    return Optional.of(JDK.of(javaVersion, javaHome));
-                }
+                return Exceptional.of(JDK.of(javaVersion, javaHome));
             }
             else {
-                LOGGER.warn(
-                    "The version of the JDK at [{0}] could not be detected. This installation will be ignored.", home);
+                LOGGER.warn("Could not detect Java version from release file at [{0}]", releaseFile);
+                return Exceptional.empty();
             }
         }
-        catch (final Exception e) {
-            LOGGER.warn("Failed to execute bin/java in [{0}]", home, e);
+        catch (final IOException e) {
+            LOGGER.warn("Failed to read release file at [{0}]", releaseFile, e);
+            return Exceptional.ofException(e);
         }
-
-        return Optional.empty();
     }
 
     /**
-     * Attempts to detect the locally installed operating system default {@link JDK}, by executing
-     * {@code java -XshowSettings:properties -version}
+     * Attempts to detect the default {@link JDK} for the currently running virtual machine by reading its
+     * {@code release} metadata file from {@code java.home}.
      *
-     * @return the {@link Optional} local {@link JDK}, otherwise {@link Optional#empty()} if it can't be detected
+     * @return the {@link Optional} default {@link JDK}, otherwise {@link Optional#empty()} if it can't be detected
      */
     static Optional<JDK> detectDefault() {
-        final var LOGGER = Logger.get(JDKDetector.class);
-
-        final var machine = LocalMachine.get();
-        final var executable = "java";
-
-        final var subscriber = new CompletingSubscriber<String>();
-
-        final var HOME_PREFIX = "java.home = ";
-        final var home = subscriber.when(line -> line.trim().startsWith(HOME_PREFIX), String::trim);
-
-        final var VERSION_PREFIX = "java.version = ";
-        final var version = subscriber.when(line -> line.trim().startsWith(VERSION_PREFIX), String::trim);
-
-        try (Application application = machine.launch(
-            executable,
-            Argument.of("-XshowSettings:properties"),
-            Argument.of("-version"),
-            StandardErrorSubscriber.of(subscriber))) {
-
-            application.onExit()
-                .join();
-
-            if (home.isDone() && !home.isCancelled() && !home.isCompletedExceptionally()) {
-                // obtain the JDKHome from the captured output
-                final var jdkHome = JDKHome.of(home.get().substring(HOME_PREFIX.length()));
-
-                // should we have also captured the JDKVersion, we can use that to create the JDK
-                if (version.isDone() && !version.isCancelled() && !version.isCompletedExceptionally()) {
-                    // obtain the JDKVersion from the captured output
-                    final var jdkVersion = JDKVersion.of(version.get().substring(VERSION_PREFIX.length()));
-
-                    // use the JavaHome to detect the JDK
-                    return Optional.of(JDK.of(jdkVersion, jdkHome));
-                }
-                else {
-                    // attempt to use JDK to detect the JDK
-                    return of(jdkHome.path());
-                }
-            }
-
-            return Optional.empty();
-        }
-        catch (final Exception e) {
-            LOGGER.error("Failed to determine the default JDK installation", e);
-
-            return Optional.empty();
-        }
+        return of(Path.of(System.getProperty("java.home"))).optional();
     }
 }
