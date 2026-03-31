@@ -58,7 +58,27 @@ public class UnixDomainSocketBasedSession
     /**
      * The {@code docker.sock} {@link File}.
      */
-    private static final File DOCKER_SOCK_FILE = new File("/var/run/docker.sock");
+    private static final File DOCKER_SOCK_FILE = resolveDockerSockFile();
+
+    /**
+     * Resolves the {@code docker.sock} {@link File} by checking known locations in order of preference.
+     *
+     * @return the {@code docker.sock} {@link File}
+     */
+    private static File resolveDockerSockFile() {
+        final var candidates = new java.util.ArrayList<File>();
+
+        // Docker Desktop on Linux
+        candidates.add(new File(System.getProperty("user.home") + "/.docker/desktop/docker.sock"));
+
+        // standard Docker Engine location
+        candidates.add(new File("/var/run/docker.sock"));
+
+        return candidates.stream()
+            .filter(File::exists)
+            .findFirst()
+            .orElse(new File("/var/run/docker.sock"));
+    }
 
     /**
      * Constructs a {@link UnixDomainSocketBasedSession} using the specified {@link Configuration}.
