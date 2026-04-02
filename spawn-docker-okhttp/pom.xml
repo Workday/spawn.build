@@ -35,6 +35,42 @@
         </dependency>
 
         <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-archiving</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-configuration</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-flow</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-foundation</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-io</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-option</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>build.codemodel</groupId>
             <artifactId>dependency-injection</artifactId>
             <version>${codemodel.version}</version>
@@ -58,17 +94,28 @@
             <version>${okhttp.version}</version>
         </dependency>
 
-        <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+            <version>${jakarta-inject.version}</version>
         </dependency>
 
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
@@ -81,9 +128,22 @@
         </dependency>
 
         <dependency>
+            <groupId>build.codemodel</groupId>
+            <artifactId>codemodel-foundation</artifactId>
+            <version>${codemodel.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.codemodel</groupId>
+            <artifactId>jdk-codemodel</artifactId>
+            <version>${codemodel.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>build.base</groupId>
             <artifactId>base-assertion</artifactId>
             <version>${base.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -97,6 +157,19 @@
                     <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                     <useSystemClassLoader>true</useSystemClassLoader>
                     <useManifestOnlyJar>false</useManifestOnlyJar>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <ignoredUnusedDeclaredDependencies>
+                        <unusedDeclaredDependency>com.kohlschutter.junixsocket:junixsocket-native-common</unusedDeclaredDependency>
+                    </ignoredUnusedDeclaredDependencies>
+                    <ignoredNonTestScopedDependencies>
+                        <ignoredNonTestScopedDependency>build.codemodel:codemodel-foundation</ignoredNonTestScopedDependency>
+                        <ignoredNonTestScopedDependency>build.codemodel:jdk-codemodel</ignoredNonTestScopedDependency>
+                    </ignoredNonTestScopedDependencies>
                 </configuration>
             </plugin>
         </plugins>

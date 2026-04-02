@@ -22,10 +22,9 @@ package build.spawn.docker.okhttp.event;
 
 import build.spawn.docker.Event;
 import build.spawn.docker.okhttp.model.AbstractJsonBasedResult;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * An abstract {@link Event}.

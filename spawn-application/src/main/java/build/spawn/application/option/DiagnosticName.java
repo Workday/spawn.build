@@ -21,9 +21,8 @@ package build.spawn.application.option;
  */
 
 import build.base.configuration.AbstractValueOption;
-
-import build.spawn.application.Application;
 import build.base.configuration.Option;
+import build.spawn.application.Application;
 
 /**
  * An immutable {@link Option} defining a diagnostic name for an {@link Application}, to be used for identifying

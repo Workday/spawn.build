@@ -22,14 +22,13 @@ package build.spawn.docker.option;
 
 import build.base.configuration.CollectedOption;
 import build.spawn.docker.Container;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Objects;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A {@link DockerOption} to bind a {@link Path} outside a {@link Container} inside a {@link Container}.

@@ -25,6 +25,7 @@ import build.spawn.docker.Image;
 import build.spawn.docker.PublishedPort;
 import build.spawn.docker.option.ExposedPort;
 import build.spawn.docker.option.Link;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.inject.Inject;
 
 import java.net.InetSocketAddress;
@@ -37,8 +38,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * An internal implementation of {@link Container.Information}.

@@ -4,13 +4,13 @@ import build.base.network.Network;
 import build.base.table.Table;
 import build.spawn.application.Machine;
 import build.spawn.platform.local.LocalMachine;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.net.NetworkInterface;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link LocalMachine}s.

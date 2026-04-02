@@ -2,13 +2,12 @@ package build.spawn.platform.local.jdk;
 
 import build.base.foundation.Exceptional;
 import build.spawn.jdk.JDK;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link JDKDetector}s.

@@ -21,6 +21,7 @@ package build.spawn.docker.okhttp.command;
  */
 
 import build.spawn.docker.Container;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -32,8 +33,6 @@ import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A command to retrieve information about a file from a running container.

@@ -22,13 +22,12 @@ package build.spawn.docker.option;
 
 import build.base.configuration.CollectedOption;
 import build.base.foundation.Strings;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A {@link DockerOption} to expose a port for a {@link build.spawn.docker.Container}.

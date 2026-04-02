@@ -20,8 +20,6 @@ package build.spawn.platform.local.jdk.application;
  * #L%
  */
 
-import build.spawn.application.option.LaunchIdentity;
-
 import java.time.Duration;
 
 /**

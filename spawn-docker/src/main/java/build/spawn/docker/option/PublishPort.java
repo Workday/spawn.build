@@ -21,15 +21,14 @@ package build.spawn.docker.option;
  */
 
 import build.base.configuration.CollectedOption;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A {@link DockerOption} to publish an internal {@link build.spawn.docker.Container} port to an external

@@ -21,13 +21,12 @@ package build.spawn.docker.option;
  */
 
 import build.base.configuration.CollectedOption;
-
-import java.util.LinkedHashSet;
-import java.util.Objects;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.LinkedHashSet;
+import java.util.Objects;
 
 /**
  * A {@link DockerOption} to link an existing container name or id to the new container.

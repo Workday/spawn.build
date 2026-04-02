@@ -26,7 +26,6 @@
 open module build.spawn.application {
     requires transitive build.spawn.option;
 
-    requires transitive build.base.archiving;
     requires transitive build.base.configuration;
     requires transitive build.base.commandline;
     requires transitive build.base.expression;

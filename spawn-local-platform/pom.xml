@@ -30,7 +30,31 @@
 
         <dependency>
             <groupId>build.base</groupId>
+            <artifactId>base-configuration</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-foundation</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-io</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
             <artifactId>base-logging</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-network</artifactId>
             <version>${base.version}</version>
         </dependency>
 
@@ -40,17 +64,22 @@
             <version>${base.version}</version>
         </dependency>
 
-        <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <groupId>build.base</groupId>
+            <artifactId>base-flow</artifactId>
+            <version>${base.version}</version>
         </dependency>
 
         <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-table</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
@@ -84,11 +113,19 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>dependency-properties</id>
                         <goals>
                             <goal>properties</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <ignoredNonTestScopedDependencies>
+                        <!-- required at compile scope for transitive module resolution; only used in test code directly -->
+                        <ignoredNonTestScopedDependency>build.base:base-flow</ignoredNonTestScopedDependency>
+                        <ignoredNonTestScopedDependency>build.base:base-table</ignoredNonTestScopedDependency>
+                    </ignoredNonTestScopedDependencies>
+                </configuration>
             </plugin>
 
             <plugin>

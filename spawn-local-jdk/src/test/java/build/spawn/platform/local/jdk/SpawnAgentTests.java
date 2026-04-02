@@ -15,7 +15,8 @@ import build.spawn.jdk.option.MainClass;
 import build.spawn.jdk.option.ModulePath;
 import build.spawn.platform.local.LocalMachine;
 import build.spawn.platform.local.jdk.application.SpawnAgentDiagnosticApplication;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the {@link SpawnAgent}.

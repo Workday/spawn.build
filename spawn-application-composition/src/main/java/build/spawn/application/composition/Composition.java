@@ -33,7 +33,6 @@ import build.spawn.application.composition.option.ApplicationIdentifier;
 import build.spawn.application.option.DiagnosticName;
 import build.spawn.application.option.DiagnosticNameProvider;
 import build.spawn.jdk.option.SystemProperty;
-import static build.spawn.application.composition.option.ApplicationIdentifier.SYSTEM_PROPERTY;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -69,6 +68,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import static build.spawn.application.composition.option.ApplicationIdentifier.SYSTEM_PROPERTY;
 
 /**
  * A collection of zero or more {@link Application}s that may be managed together.

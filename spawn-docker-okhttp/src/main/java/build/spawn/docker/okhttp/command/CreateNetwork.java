@@ -22,6 +22,7 @@ package build.spawn.docker.okhttp.command;
 
 import build.base.configuration.Configuration;
 import build.spawn.docker.option.DockerOption;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -30,9 +31,6 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A command to create docker network.

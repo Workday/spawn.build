@@ -36,7 +36,7 @@
 
         <dependency>
             <groupId>build.base</groupId>
-            <artifactId>base-network</artifactId>
+            <artifactId>base-flow</artifactId>
             <version>${base.version}</version>
         </dependency>
 
@@ -61,14 +61,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>

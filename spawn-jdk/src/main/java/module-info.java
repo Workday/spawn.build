@@ -27,6 +27,7 @@ open module build.spawn.jdk {
     requires java.instrument;
     requires java.management;
 
+    requires build.base.archiving;
     requires transitive build.base.foundation;
     requires transitive build.base.network;
 

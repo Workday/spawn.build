@@ -5,7 +5,6 @@ import build.base.flow.CompletingSubscriber;
 import build.spawn.application.option.Argument;
 import build.spawn.application.option.StandardErrorSubscriber;
 import build.spawn.platform.local.LocalMachine;
-
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;

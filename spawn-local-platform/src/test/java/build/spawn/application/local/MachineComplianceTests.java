@@ -12,13 +12,13 @@ import build.spawn.application.option.Argument;
 import build.spawn.application.option.StandardErrorSubscriber;
 import build.spawn.application.option.StandardOutputSubscriber;
 import build.spawn.option.EnvironmentVariable;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 /**
  * Compliance tests for all {@link Machine}s.

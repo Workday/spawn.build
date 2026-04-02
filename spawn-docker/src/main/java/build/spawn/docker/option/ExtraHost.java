@@ -22,12 +22,11 @@ package build.spawn.docker.option;
 
 import build.base.configuration.AbstractValueOption;
 import build.base.configuration.CollectedOption;
-
-import java.util.LinkedHashSet;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.LinkedHashSet;
 
 /**
  * A {@link DockerOption} to define an extra {@code /etc/host} information for a {@link build.spawn.docker.Container}
