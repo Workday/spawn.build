@@ -20,14 +20,13 @@ package build.spawn.docker.okhttp.command;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A command to delete networks.

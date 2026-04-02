@@ -26,7 +26,14 @@
 open module build.spawn.platform.local.jdk {
     requires com.google.auto.service;
 
+    requires java.logging;
+
     requires transitive build.base.foundation;
+    requires build.base.archiving;
+    requires build.base.commandline;
+    requires build.base.flow;
+    requires build.base.io;
+    requires build.base.naming;
 
     requires transitive build.spawn.application;
     requires transitive build.spawn.jdk;

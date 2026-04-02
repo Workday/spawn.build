@@ -21,7 +21,6 @@ package build.spawn.docker.option;
  */
 
 import build.base.configuration.Default;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 

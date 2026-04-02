@@ -24,6 +24,8 @@ import build.base.configuration.Configuration;
 import build.spawn.docker.Image;
 import build.spawn.docker.okhttp.model.ImageInformation;
 import build.spawn.docker.option.ImageName;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -32,9 +34,6 @@ import okhttp3.Response;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The {@code Docker Engine} {@link Command} to

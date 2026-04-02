@@ -21,8 +21,8 @@ package build.spawn.docker.okhttp;
  */
 
 import build.base.configuration.Configuration;
-import build.spawn.docker.Session;
 import build.codemodel.injection.InjectionFramework;
+import build.spawn.docker.Session;
 import jakarta.inject.Inject;
 import okhttp3.ConnectionPool;
 import okhttp3.Dns;
@@ -31,7 +31,6 @@ import okhttp3.OkHttpClient;
 import org.newsclub.net.unix.AFUNIXSocket;
 import org.newsclub.net.unix.AFUNIXSocketAddress;
 
-import javax.net.SocketFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +44,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import javax.net.SocketFactory;
 
 /**
  * A Unix Domain Socket-based {@code Docker} {@link Session}.

@@ -1,7 +1,6 @@
 package build.spawn.docker.okhttp.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;

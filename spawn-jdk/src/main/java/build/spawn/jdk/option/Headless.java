@@ -20,7 +20,6 @@ package build.spawn.jdk.option;
  * #L%
  */
 
-import build.base.configuration.Configuration;
 import build.base.configuration.ConfigurationBuilder;
 import build.base.configuration.Default;
 import build.spawn.application.Platform;

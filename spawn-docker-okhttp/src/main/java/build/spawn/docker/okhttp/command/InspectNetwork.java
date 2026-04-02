@@ -22,6 +22,8 @@ package build.spawn.docker.okhttp.command;
 
 import build.spawn.docker.Network;
 import build.spawn.docker.okhttp.model.NetworkInformation;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -29,9 +31,6 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.Optional;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A command to get network information.

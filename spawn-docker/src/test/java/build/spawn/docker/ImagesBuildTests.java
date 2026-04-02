@@ -1,7 +1,6 @@
 package build.spawn.docker;
 
 import build.base.configuration.Configuration;
-
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

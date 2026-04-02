@@ -48,7 +48,7 @@
 
         <dependency>
             <groupId>build.base</groupId>
-            <artifactId>base-archiving</artifactId>
+            <artifactId>base-flow</artifactId>
             <version>${base.version}</version>
         </dependency>
 
@@ -83,22 +83,39 @@
         </dependency>
 
         <dependency>
+            <groupId>build.base</groupId>
+            <artifactId>base-table</artifactId>
+            <version>${base.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>build.codemodel</groupId>
+            <artifactId>codemodel-foundation</artifactId>
+            <version>${codemodel.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>build.codemodel</groupId>
             <artifactId>dependency-injection</artifactId>
             <version>${codemodel.version}</version>
         </dependency>
 
-        <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <groupId>build.codemodel</groupId>
+            <artifactId>jdk-codemodel</artifactId>
+            <version>${codemodel.version}</version>
         </dependency>
 
         <dependency>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+            <version>${jakarta-inject.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
