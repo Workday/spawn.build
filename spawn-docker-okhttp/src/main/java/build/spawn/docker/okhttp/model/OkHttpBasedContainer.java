@@ -9,9 +9,9 @@ package build.spawn.docker.okhttp.model;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +46,7 @@ import build.spawn.docker.okhttp.command.PauseContainer;
 import build.spawn.docker.okhttp.command.StartExecution;
 import build.spawn.docker.okhttp.command.StopContainer;
 import build.spawn.docker.okhttp.command.UnpauseContainer;
-import build.spawn.docker.okhttp.event.StatusEvent;
+import build.spawn.docker.okhttp.event.ActionEvent;
 import build.spawn.docker.option.Command;
 import jakarta.inject.Inject;
 
@@ -96,9 +96,9 @@ public class OkHttpBasedContainer
     private String id;
 
     /**
-     * The {@link CompletingSubscriber} to allow observation of specific {@code Container} {@link StatusEvent}s.
+     * The {@link CompletingSubscriber} to allow observation of specific {@code Container} {@link ActionEvent}s.
      */
-    private CompletingSubscriber<StatusEvent> completingSubscriber;
+    private CompletingSubscriber<ActionEvent> completingSubscriber;
 
     /**
      * The {@link CompletableFuture} indicating when the {@link Container} has started.
@@ -134,16 +134,17 @@ public class OkHttpBasedContainer
 
         // establish a CompletingSubscriber for the Container
         this.completingSubscriber = new CompletingSubscriber<>();
+
         this.publisher.subscribe(
-            FilteringSubscriber.of(StatusEvent.class::isInstance,
-                MappingSubscriber.of(StatusEvent.class::cast,
+            FilteringSubscriber.of(ActionEvent.class::isInstance,
+                MappingSubscriber.of(ActionEvent.class::cast,
                     FilteringSubscriber.of(
-                        event -> event.jsonNode().get("id").asText().equals(this.id),
+                        event -> event.actor().get("ID").asText().equals(this.id),
                         this.completingSubscriber))));
 
         // establish the CompletableFuture to identify when the Container has started
         this.onStart = this.completingSubscriber.when(
-            event -> "start".equals(event.jsonNode().get("Action").asText()),
+            event -> "start".equals(event.action()),
             __ -> {
                 System.out.println("Started Container: " + this.id.substring(this.id.length() - 8));
                 return this;
@@ -152,11 +153,11 @@ public class OkHttpBasedContainer
         // establish the CompletableFuture to identify when the Container has terminated (died)
         this.onExit = this.completingSubscriber.when(event -> {
                 final var jsonNode = event.jsonNode();
-                final var action = jsonNode.get("Action").asText();
+                final var action = event.action();
 
                 if ("die".equals(action)) {
                     // extract the exitCode as the exitValue for the Container
-                    final var exitCode = jsonNode.get("Actor").get("Attributes").get("exitCode");
+                    final var exitCode = event.actor().get("Attributes").get("exitCode");
                     this.exitValue = exitCode.isMissingNode() ? null : exitCode.asInt();
 
                     return true;

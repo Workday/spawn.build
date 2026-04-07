@@ -9,9 +9,9 @@ package build.spawn.docker.okhttp;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,6 +48,7 @@ import build.spawn.docker.okhttp.command.InspectImage;
 import build.spawn.docker.okhttp.command.InspectNetwork;
 import build.spawn.docker.okhttp.command.PullImage;
 import build.spawn.docker.okhttp.model.OkHttpBasedImage;
+import build.spawn.docker.option.DockerAPIVersion;
 import build.spawn.docker.option.DockerRegistry;
 import build.spawn.docker.option.IdentityToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -147,21 +148,20 @@ public class AbstractSession
         // establish the HttpClient from the Supplier (allowing us to connect to the Docker Engine)
         this.httpClient = clientSupplier.get();
 
-        // TODO: I'm not sure this is needed?
-        //            // include the DockerAPIVersion (if it's defined)
-        //            this.configuration.getOptional(DockerAPIVersion.class)
-        //                .ifPresent(DockerAPIVersion::get);
-
         this.configuration = configuration == null
             ? Configuration.empty()
             : configuration;
+
+        // include the DockerAPIVersion (if it's defined)
+        this.configuration.getOptional(DockerAPIVersion.class)
+            .ifPresent(DockerAPIVersion::get);
 
         // establish the Publicist for Docker Engine Events for the Connection
         this.publicist = new SubscriberRegistry<>();
 
         // establish the CompletingSubscriber allowing CompletableFutures to be completed
         // when required Docker Events are Observed
-        this.eventSubscriber = new CompletingSubscriber<Event>();
+        this.eventSubscriber = new CompletingSubscriber<>();
         this.publicist.subscribe(this.eventSubscriber);
 
         // establish an ObjectMapper for working with JSON
@@ -212,12 +212,14 @@ public class AbstractSession
                     .ifPresent(email -> json.put("email", email));
                 this.configuration.getOptionalValue(DockerRegistry.class)
                     .ifPresent(url -> json.put("serveraddress", url.getHost()));
-            } else {
+            }
+            else {
                 json.put("identitytoken", identityToken.get());
             }
 
             xRegistryAuth = Optional.of(json.toString());
-        } else {
+        }
+        else {
             // determine the Configuration-provided IdentityToken
             final var identityToken = this.configuration
                 .getOptional(IdentityToken.class)
@@ -230,7 +232,8 @@ public class AbstractSession
             // capture the non-empty IdentityToken for authentication
             if (identityToken.isEmpty()) {
                 xRegistryAuth = Optional.empty();
-            } else {
+            }
+            else {
                 final var json = objectMapper.createObjectNode();
                 json.put("identitytoken", identityToken.get());
                 xRegistryAuth = Optional.of(json.toString());
