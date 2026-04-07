@@ -24,6 +24,7 @@ import build.base.commandline.CommandLine;
 import build.base.configuration.Configuration;
 import build.base.configuration.ConfigurationBuilder;
 import build.base.foundation.Introspection;
+import build.base.logging.Logger;
 import build.base.naming.UniqueNameGenerator;
 import build.base.option.TemporaryDirectory;
 import build.base.option.WorkingDirectory;
@@ -68,6 +69,11 @@ import java.util.stream.Stream;
  */
 public abstract class AbstractTemplatedLauncher<A extends Application, P extends Platform, N extends Process>
     implements TemplatedLauncher<A, P, N> {
+
+    /**
+     * The {@link Logger}.
+     */
+    private static final Logger LOGGER = Logger.get(AbstractTemplatedLauncher.class);
 
     /**
      * A {@link UniqueNameGenerator} to generate unique {@link Application} names.
@@ -295,7 +301,8 @@ public abstract class AbstractTemplatedLauncher<A extends Application, P extends
                             });
                         }
                         catch (final ClassNotFoundException e) {
-                            // TODO: log the fact that the Class can't be found
+                            LOGGER.debug("Could not load class [{0}] for Iterable injection resolution",
+                                namedTypeUsage.typeName().canonicalName(), e);
                         }
                     }
                 }

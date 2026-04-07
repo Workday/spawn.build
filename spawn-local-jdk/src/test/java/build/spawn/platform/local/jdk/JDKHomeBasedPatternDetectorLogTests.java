@@ -23,12 +23,6 @@ class JDKHomeBasedPatternDetectorLogTests {
      * Ensure that when a configured JDK search path does not exist, the debug log message
      * shows both the <em>base</em> directory and the full <em>pattern</em> that was skipped.
      * <p>
-     * BUG: The format string in {@link JDKHomeBasedPatternDetector} reads
-     * {@code "Skipping path [{0}] for pattern [{0}] as the path does not exist"} — the
-     * second placeholder is {@code {0}} (base) when it should be {@code {1}} (pattern).
-     * This causes the pattern value to never appear in the log, making the message
-     * misleading when diagnosing JDK detection failures.
-     * <p>
      * NOTE: This test captures log output via {@code java.util.logging} (JUL) on the assumption
      * that {@code build.base.logging.Logger} delegates to JUL.  If a different backend is used,
      * this test will pass vacuously (no records captured) and must be revisited.

@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An {@link InputStreamProcessor} for {@link JsonNode}s.
@@ -41,6 +43,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class JsonNodeInputStreamProcessor
     implements InputStreamProcessor<JsonNode> {
+
+    /**
+     * The {@link Logger}.
+     */
+    private static final Logger LOG = Logger.getLogger(JsonNodeInputStreamProcessor.class.getName());
 
     /**
      * The {@link JsonFactory} to produce {@link JsonParser}s.
@@ -101,13 +108,13 @@ public class JsonNodeInputStreamProcessor
                     final JsonNode jsonNode = this.objectMapper.readTree(parser);
                     subscriber.onNext(jsonNode);
                 } catch (final Throwable throwable) {
-                    // TODO: log the throwable
+                    LOG.log(Level.FINE, "Failed to read or deliver a JSON node from the stream", throwable);
                     failed = true;
                     subscriber.onError(throwable);
                 }
             }
         } catch (final Throwable throwable) {
-            // TODO: log the throwable
+            LOG.log(Level.FINE, "Failed while processing the JSON input stream", throwable);
             if (!failed) {
                 subscriber.onError(throwable);
             }
@@ -119,7 +126,7 @@ public class JsonNodeInputStreamProcessor
 
                 inputStream.close();
             } catch (final IOException e) {
-                // TODO: log the throwable
+                LOG.log(Level.FINE, "Failed to close the JSON input stream", e);
             }
         }
     }

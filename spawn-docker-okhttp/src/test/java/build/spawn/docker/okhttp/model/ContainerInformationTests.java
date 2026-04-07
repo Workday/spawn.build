@@ -18,10 +18,6 @@ class ContainerInformationTests {
     /**
      * Ensure that {@link ContainerInformation#name()} returns the plain container name
      * without JSON quote characters.
-     * <p>
-     * BUG: {@link ContainerInformation#name()} calls {@code jsonNode().get("Name").toString()},
-     * which returns the JSON representation of the text node (e.g. {@code "\"/my-container\""})
-     * rather than the raw text value.  It should call {@code asText()} instead.
      *
      * @throws Exception if reflection-based field injection fails
      */

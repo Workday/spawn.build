@@ -267,7 +267,7 @@ public abstract class AbstractTemplatedPlatform
 
     @Override
     public void close() {
-        // TODO: ensure any asynchronous tasks are shutdown?
+        this.server.close();
     }
 
     @Override
