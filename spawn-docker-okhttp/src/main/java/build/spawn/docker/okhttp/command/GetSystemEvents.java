@@ -9,9 +9,9 @@ package build.spawn.docker.okhttp.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import build.base.flow.Publicist;
 import build.base.flow.Subscriber;
 import build.base.naming.UniqueNameGenerator;
 import build.spawn.docker.Event;
-import build.spawn.docker.okhttp.event.StatusEvent;
+import build.spawn.docker.okhttp.event.ActionEvent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
@@ -82,9 +82,9 @@ public class GetSystemEvents
 
                     System.out.println("Raw Event: [" + name + "] " + item.toPrettyString());
 
-                    // publish "status" events as StatusEvents
-                    if (item.get("status") != null) {
-                        final var event = context.create(StatusEvent.class);
+                    // publish "Action" events as ActionEvents
+                    if (item.get("Action") != null) {
+                        final var event = context.create(ActionEvent.class);
                         GetSystemEvents.this.publisher.publish(event);
                     }
                 }

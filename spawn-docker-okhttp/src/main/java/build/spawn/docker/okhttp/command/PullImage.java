@@ -25,7 +25,7 @@ import build.base.flow.CompletingSubscriber;
 import build.base.flow.Publisher;
 import build.spawn.docker.Event;
 import build.spawn.docker.okhttp.Authenticator;
-import build.spawn.docker.okhttp.event.StatusEvent;
+import build.spawn.docker.okhttp.event.ActionEvent;
 import build.spawn.docker.option.ImageName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
@@ -111,8 +111,8 @@ public class PullImage
     @Override
     protected CompletableFuture<?> subscribe(final Publisher<Event> publisher) {
         return this.eventSubscriber.when(event ->
-            event instanceof StatusEvent statusEvent
-                && statusEvent.status().equals("pull")
-                && statusEvent.jsonNode().get("id").asText().equals(this.nameOrId));
+            event instanceof ActionEvent actionEvent
+                && actionEvent.action().equals("pull")
+                && actionEvent.jsonNode().get("id").asText().equals(this.nameOrId));
     }
 }
