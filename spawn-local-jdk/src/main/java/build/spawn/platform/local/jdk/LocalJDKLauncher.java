@@ -49,7 +49,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link Launcher} for {@link JDKApplication}s on a {@link LocalMachine}.
@@ -65,6 +67,11 @@ public class LocalJDKLauncher
      */
     private static final Logger LOGGER = Logger.get(LocalJDKLauncher.class);
 
+    /**
+     * The cached {@link Path} to the {@link SpawnAgent} archive, created at most once per JVM.
+     */
+    private static final AtomicReference<Path> SPAWN_AGENT_ARCHIVE = new AtomicReference<>();
+
     @Override
     public Optional<Executable> getExecutable(final ConfigurationBuilder options) {
         return Optional.of(Executable.of(options.get(JDKHome.class).get() + "/bin/java"));
@@ -74,10 +81,13 @@ public class LocalJDKLauncher
     public LocalProcess createProcess(final LocalMachine machine,
                                       final ConfigurationBuilder options) {
 
-        // TODO: this should be once and only once per (this) Virtual Machine
-        // obtain the Path to the SpawnAgent archive
-        final var spawnAgentPath = SpawnAgentArchiveBuilder.getArchive()
-            .orElseGet(SpawnAgentArchiveBuilder::createArchive);
+        // obtain the Path to the SpawnAgent archive, creating it at most once per JVM
+        if (SPAWN_AGENT_ARCHIVE.get() == null) {
+            final Path created = SpawnAgentArchiveBuilder.getArchive()
+                .orElseGet(SpawnAgentArchiveBuilder::createArchive);
+            SPAWN_AGENT_ARCHIVE.compareAndSet(null, created);
+        }
+        final var spawnAgentPath = SPAWN_AGENT_ARCHIVE.get();
 
         // establish a ProcessBuilder to create and launch the underlying process for the application
         final ProcessBuilder processBuilder = getExecutable(options)

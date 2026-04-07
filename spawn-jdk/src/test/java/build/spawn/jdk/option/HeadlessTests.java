@@ -24,10 +24,6 @@ class HeadlessTests {
     /**
      * Ensure {@link Headless#DISABLED} resolves to an empty stream, adding no tokens to the
      * JVM command line.
-     * <p>
-     * BUG: {@link Headless#DISABLED} returns {@code Stream.of("")} — a stream containing a
-     * single empty-string token — instead of {@code Stream.empty()}.  This causes a blank
-     * argument to be injected into the JVM command line, which can confuse argument parsers.
      */
     @Test
     void disabledShouldResolveToNoTokens() {

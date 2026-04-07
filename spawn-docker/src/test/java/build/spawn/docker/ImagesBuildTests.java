@@ -20,10 +20,6 @@ class ImagesBuildTests {
     /**
      * Ensure that an {@link IOException} thrown by a {@link DockerContextBuilder} propagates
      * to the caller rather than being silently swallowed.
-     * <p>
-     * BUG: The default {@link Images#build(DockerContextBuilder, build.base.configuration.Option...)}
-     * method catches {@link IOException} from {@link DockerContextBuilder#build()} and returns
-     * {@code Optional.empty()} without logging or rethrowing, making failures invisible to callers.
      */
     @Test
     void buildShouldPropagateIOExceptionFromContextBuilder() {
@@ -63,7 +59,6 @@ class ImagesBuildTests {
             }
         };
 
-        // the IOException should propagate; currently it is caught and Optional.empty() returned silently
         assertThatThrownBy(() -> images.build(failingBuilder))
             .isInstanceOf(IOException.class)
             .hasMessage("simulated Docker context build failure");

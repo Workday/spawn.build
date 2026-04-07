@@ -22,6 +22,7 @@ package build.spawn.docker.okhttp.command;
 
 import build.base.configuration.Configuration;
 import build.spawn.docker.Container;
+import build.spawn.docker.option.KillSignal;
 import jakarta.inject.Inject;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -46,23 +47,32 @@ public class KillContainer
     private Container container;
 
     /**
+     * The {@link Configuration} for the {@link Command}.
+     */
+    private final Configuration configuration;
+
+    /**
      * Constructs a {@link KillContainer} {@link Command}.
      *
      * @param configuration the {@link Configuration} to kill the {@link Container}
      */
     public KillContainer(final Configuration configuration) {
+        this.configuration = configuration == null
+            ? Configuration.empty()
+            : configuration;
     }
 
     @Override
     protected Request createRequest(final HttpUrl.Builder httpUrlBuilder) {
 
-        // TODO: include the SigTerm for stopping
+        final KillSignal signal = this.configuration.get(KillSignal.class);
 
         return new Request.Builder()
             .url(httpUrlBuilder
                 .addPathSegment("containers")
                 .addPathSegment(this.container.id())
                 .addPathSegment("kill")
+                .addQueryParameter("signal", signal.signalName())
                 .build())
             .post(EMPTY_BODY)
             .build();
