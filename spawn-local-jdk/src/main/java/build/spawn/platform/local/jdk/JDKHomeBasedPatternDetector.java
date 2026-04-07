@@ -145,12 +145,22 @@ public class JDKHomeBasedPatternDetector
 
                                 final ArrayList<Path> paths = new ArrayList<>();
 
+                                // compute max walk depth from the pattern suffix — patterns without **
+                                // can only match at a fixed depth, so there's no need to go deeper.
+                                // +1 because Files.walkFileTree calls preVisitDirectory for depths
+                                // 0..maxDepth-1 only; at exactly maxDepth, directories are delivered
+                                // via visitFile and our preVisitDirectory check never fires.
+                                final String patternSuffix = pattern.substring(lastPathSeparator);
+                                final int maxDepth = patternSuffix.contains("**")
+                                    ? Integer.MAX_VALUE
+                                    : (int) patternSuffix.chars().filter(c -> c == '/').count() + 1;
+
                                 // attempt to find paths matching the glob, iff the base path exists
                                 if (base.toFile().exists()) {
                                     Files.walkFileTree(
                                         base,
                                         EnumSet.of(FileVisitOption.FOLLOW_LINKS),
-                                        Integer.MAX_VALUE,
+                                        maxDepth,
                                         new SimpleFileVisitor<Path>() {
                                             @Override
                                             public FileVisitResult preVisitDirectory(final Path path,
