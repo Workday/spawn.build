@@ -77,7 +77,7 @@
         <jakarta-inject.version>2.0.1</jakarta-inject.version>
         <mockito.version>5.23.0</mockito.version>
         <okhttp.version>4.12.0</okhttp.version>
-        <codemodel.version>0.19.0-SNAPSHOT</codemodel.version>
+        <codemodel.version>0.19.0</codemodel.version>
 
         <!-- Plugin Dependency Versions -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
