@@ -12,6 +12,8 @@
     <packaging>pom</packaging>
 
     <name>Spawn Project</name>
+    <description>A Java-based multi-module framework for programmatically launching and controlling processes, JVMs, and Docker containers.</description>
+    <url>https://github.com/Workday/spawn.build</url>
 
     <organization>
         <name>Workday, Inc.</name>
@@ -31,6 +33,15 @@
         <developer>
             <name>Brian Oliver</name>
             <email>brian.oliver@workday.com</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>Reed von Redwitz</name>
+            <email>reed.vonredwitz@workday.com</email>
             <roles>
                 <role>architect</role>
                 <role>developer</role>
@@ -60,13 +71,13 @@
         <auto-service.version>1.1.1</auto-service.version>
         <base.version>0.21.5</base.version>
         <byte-buddy.version>1.18.4</byte-buddy.version>
-        <jackson.version>2.21.2</jackson.version>
+        <jackson-core.version>2.21.2</jackson-core.version>
         <junit.version>6.0.3</junit.version>
         <junixsocket.version>2.10.1</junixsocket.version>
         <jakarta-inject.version>2.0.1</jakarta-inject.version>
         <mockito.version>5.23.0</mockito.version>
         <okhttp.version>4.12.0</okhttp.version>
-        <codemodel.version>0.19.0-SNAPSHOT</codemodel.version>
+        <codemodel.version>0.19.0</codemodel.version>
 
         <!-- Plugin Dependency Versions -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
@@ -119,6 +130,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <parameters>true</parameters>
+                    <testCompilerArgument>-parameters</testCompilerArgument>
                 </configuration>
             </plugin>
 
@@ -168,6 +181,7 @@
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>${maven-flatten-plugin.version}</version>
                 <configuration>
+                    <flattenMode>ossrh</flattenMode>
                     <updatePomFile>true</updatePomFile>
                 </configuration>
                 <executions>
@@ -323,6 +337,16 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
