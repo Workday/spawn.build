@@ -61,7 +61,7 @@ graph TB
         DockerOptions["Docker option types"]
     end
 
-    subgraph DockerImpl["spawn-docker-okhttp (OkHttp impl)"]
+    subgraph DockerImpl["spawn-docker-jdk (JDK impl)"]
         AbstractSession
         SessionFactories["Session.Factory impls"]
         Commands["Command classes"]
@@ -115,7 +115,7 @@ spawn.build/
 ├── spawn-local-platform/    # JPMS: build.spawn.platform.local — OS process launcher
 ├── spawn-local-jdk/         # JPMS: build.spawn.platform.local.jdk — JDK detection
 ├── spawn-docker/            # JPMS: build.spawn.docker — Docker Engine API interfaces
-├── spawn-docker-okhttp/     # JPMS: build.spawn.docker.okhttp — OkHttp implementation
+├── spawn-docker-jdk/        # JPMS: build.spawn.docker.jdk — JDK HTTP Client implementation
 └── pom.xml                  # Parent POM; manages versions, Checkstyle, Surefire
 ```
 
@@ -335,9 +335,9 @@ Server (listens on spawn:// URI)
 
 ---
 
-### `spawn-docker-okhttp`
+### `spawn-docker-jdk`
 
-**Purpose:** OkHttp-based concrete implementation of `spawn-docker` interfaces.
+**Purpose:** JDK-native concrete implementation of `spawn-docker` interfaces. Uses `java.net.http.HttpClient` for TCP and `java.nio.channels.SocketChannel` with `UnixDomainSocketAddress` for Unix domain sockets. No third-party HTTP dependencies.
 **Entry point:** Four `Session.Factory` implementations discovered via `ServiceLoader`, in priority order:
 1. `UnixDomainSocketBasedSession.Factory` — Unix socket (`/var/run/docker.sock` or Docker Desktop socket)
 2. `LocalHostBasedSessionFactory` — TCP `localhost:2375`
@@ -347,28 +347,25 @@ Server (listens on spawn:// URI)
 **Key files:**
 | File | Purpose |
 |------|---------|
-| `AbstractSession.java` | OkHttp client + DI context + event streaming; self-implements `Images`; `Authenticate` on construction |
-| `TCPSocketBasedSession.java` | TCP variant; configures OkHttp timeouts; no connection pooling |
-| `UnixDomainSocketBasedSession.java` | Unix domain socket via junixsocket; `ConnectedDomainSocket` adapter for OkHttp |
-| `command/AbstractCommand.java` | Template method for OkHttp request/response lifecycle |
-| `command/AbstractBlockingCommand.java` | Short-lived synchronous commands; infinite timeout |
+| `HttpTransport.java` | Thin transport interface; `Request` record + `Response` interface |
+| `Http11Parser.java` | HTTP/1.1 response parser for raw socket streams (Content-Length + chunked) |
+| `JavaHttpClientTransport.java` | `HttpTransport` impl using `java.net.http.HttpClient` for TCP |
+| `UnixSocketHttpTransport.java` | `HttpTransport` impl using `UnixDomainSocketAddress` + `Http11Parser` |
+| `AbstractSession.java` | `HttpTransport` + DI context + event streaming; self-implements `Images`; `Authenticate` on construction |
+| `TCPSocketBasedSession.java` | TCP variant using `JavaHttpClientTransport` |
+| `UnixDomainSocketBasedSession.java` | Unix domain socket variant using `UnixSocketHttpTransport` |
+| `command/AbstractCommand.java` | Template method for `HttpTransport` request/response lifecycle |
+| `command/AbstractBlockingCommand.java` | Short-lived synchronous commands |
 | `command/AbstractNonBlockingCommand.java` | Streaming commands (events, attach); keeps response open |
 | `command/AbstractEventBasedBlockingCommand.java` | Subscribes to events before sending request; used by `PullImage` |
 | `command/FrameProcessor.java` | Demultiplexes Docker's 8-byte-header binary stream protocol |
-| `event/GetSystemEvents.java` | Streaming JSON parser; publishes `StatusEvent`; virtual thread |
-| `event/StatusEvent.java` | Docker event with `"status"` field |
-| `model/OkHttpBasedContainer.java` | Full `Container` impl; `@PostInject` wires event subscription for `onStart/onExit` |
-| `model/OkHttpBasedImage.java` | `Image` impl; `start()` creates then starts container; auto-removes on start failure |
+| `event/GetSystemEvents.java` | Streaming JSON parser; publishes `ActionEvent`; virtual thread |
+| `model/DockerContainer.java` | Full `Container` impl; `@PostInject` wires event subscription for `onStart/onExit` |
+| `model/DockerImage.java` | `Image` impl; `start()` creates then starts container; auto-removes on start failure |
 | `model/AbstractJsonBasedResult.java` | DI-injected `Session`, `JsonNode`, `ObjectMapper` for all model classes |
 
-**Why slated for replacement with Java HTTP Client:**
-- OkHttp 5.x (Kotlin) pulls in `kotlin.stdlib` as runtime dependency
-- Unix domain socket support requires third-party `junixsocket` with native binaries
-- Java 16+ has `java.net.UnixDomainSocketAddress`; Java 11+ has `java.net.http.HttpClient`
-- The `ConnectedDomainSocket` adapter (200+ LOC boilerplate) would be eliminated entirely
-
-**Known bugs in `spawn-docker-okhttp`:**
-- `GetSystemEvents` and `OkHttpBasedContainer` have debug `System.out.println` calls in production code
+**Known bugs:**
+- `GetSystemEvents` and `DockerContainer` have debug `System.out.println` calls in production code
 - `CopyFiles` constructor validation inverts the check (throws when file has content instead of when it's empty)
 - `NetworkInformation.driver()` reads lowercase `"driver"` but Docker API returns `"Driver"` → always returns empty string
 - `ContainerInformation.links()`: splits on `:` — `ArrayIndexOutOfBoundsException` if link string has no colon

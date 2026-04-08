@@ -73,10 +73,8 @@
         <byte-buddy.version>1.18.4</byte-buddy.version>
         <jackson-core.version>2.21.2</jackson-core.version>
         <junit.version>6.0.3</junit.version>
-        <junixsocket.version>2.10.1</junixsocket.version>
         <jakarta-inject.version>2.0.1</jakarta-inject.version>
         <mockito.version>5.23.0</mockito.version>
-        <okhttp.version>4.12.0</okhttp.version>
         <codemodel.version>0.19.0</codemodel.version>
 
         <!-- Plugin Dependency Versions -->
@@ -107,7 +105,7 @@
         <module>spawn-option</module>
 
         <module>spawn-docker</module>
-        <module>spawn-docker-okhttp</module>
+        <module>spawn-docker-jdk</module>
     </modules>
 
     <dependencyManagement>
