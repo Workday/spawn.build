@@ -1,0 +1,4 @@
+build.spawn.docker.jdk.UnixDomainSocketBasedSession$Factory
+build.spawn.docker.jdk.LocalHostBasedSessionFactory
+build.spawn.docker.jdk.DockerHostVariableBasedSessionFactory
+build.spawn.docker.jdk.InternalDockerHostBasedSessionFactory

@@ -1,4 +1,0 @@
-build.spawn.docker.okhttp.UnixDomainSocketBasedSession$Factory
-build.spawn.docker.okhttp.LocalHostBasedSessionFactory
-build.spawn.docker.okhttp.DockerHostVariableBasedSessionFactory
-build.spawn.docker.okhttp.InternalDockerHostBasedSessionFactory
