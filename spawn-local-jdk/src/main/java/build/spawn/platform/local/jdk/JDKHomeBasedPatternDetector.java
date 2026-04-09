@@ -25,7 +25,6 @@ import build.base.expression.Variable;
 import build.base.foundation.Exceptional;
 import build.base.logging.Logger;
 import build.spawn.jdk.JDK;
-import com.google.auto.service.AutoService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +54,6 @@ import java.util.stream.Stream;
  * @author brian.oliver
  * @since Nov-2019
  */
-@AutoService(JDKDetector.class)
 public class JDKHomeBasedPatternDetector
     implements JDKDetector {
 

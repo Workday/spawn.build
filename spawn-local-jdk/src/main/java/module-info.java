@@ -24,8 +24,6 @@
  * @since Jan-2025
  */
 open module build.spawn.platform.local.jdk {
-    requires com.google.auto.service;
-
     requires java.logging;
 
     requires transitive build.base.foundation;
