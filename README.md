@@ -22,7 +22,7 @@ A Java framework for programmatically launching and controlling processes, JVMs,
 | `spawn-local-platform` | Local OS process launcher (`LocalMachine`) |
 | `spawn-local-jdk` | JDK detection and `LocalJDKLauncher` |
 | `spawn-docker` | Docker Engine API interfaces |
-| `spawn-docker-jdk` | JDK HTTP Client-based Docker implementation (unix socket via junixsocket) |
+| `spawn-docker-jdk` | JDK HTTP Client-based Docker implementation |
 
 ## Requirements
 
