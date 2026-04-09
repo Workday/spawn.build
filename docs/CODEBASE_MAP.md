@@ -372,7 +372,7 @@ Server (listens on spawn:// URI)
 
 ## Conventions
 
-### Brian Oliver Java Style
+### Code Style
 - No tabs (spaces only), enforced by Checkstyle
 - No star imports
 - Final locals where possible
