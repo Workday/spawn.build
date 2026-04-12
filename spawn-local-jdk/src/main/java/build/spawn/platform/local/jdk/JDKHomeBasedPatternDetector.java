@@ -20,8 +20,8 @@ package build.spawn.platform.local.jdk;
  * #L%
  */
 
-import build.base.expression.Processor;
-import build.base.expression.Variable;
+import build.base.expression.compat.Processor;
+import build.base.expression.compat.Variable;
 import build.base.foundation.Exceptional;
 import build.base.logging.Logger;
 import build.spawn.jdk.JDK;

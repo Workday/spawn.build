@@ -23,7 +23,7 @@ package build.spawn.jdk.option;
 import build.base.configuration.ConfigurationBuilder;
 import build.base.configuration.MappedOption;
 import build.base.configuration.Option;
-import build.base.expression.Processor;
+import build.base.expression.compat.Processor;
 import build.base.expression.option.ResolvableOption;
 import build.base.foundation.Strings;
 import build.base.table.Table;

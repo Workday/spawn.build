@@ -23,7 +23,7 @@ package build.spawn.application.option;
 import build.base.configuration.AbstractValueOption;
 import build.base.configuration.CollectedOption;
 import build.base.configuration.Option;
-import build.base.expression.Processor;
+import build.base.expression.compat.Processor;
 import build.base.expression.option.ResolvableOption;
 import build.spawn.application.Application;
 
