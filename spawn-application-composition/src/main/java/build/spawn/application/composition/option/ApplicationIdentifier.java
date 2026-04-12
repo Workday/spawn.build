@@ -22,8 +22,8 @@ package build.spawn.application.composition.option;
 
 import build.base.configuration.AbstractValueOption;
 import build.base.configuration.Option;
-import build.base.expression.Resolvable;
-import build.base.expression.Variable;
+import build.base.expression.compat.Resolvable;
+import build.base.expression.compat.Variable;
 import build.spawn.application.Application;
 import build.spawn.application.composition.Composition;
 

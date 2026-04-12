@@ -22,10 +22,10 @@ package build.spawn.application;
 
 import build.base.configuration.Configuration;
 import build.base.configuration.ConfigurationBuilder;
-import build.base.expression.Processor;
-import build.base.expression.ProcessorBuilder;
-import build.base.expression.Resolvable;
-import build.base.expression.Variable;
+import build.base.expression.compat.Processor;
+import build.base.expression.compat.ProcessorBuilder;
+import build.base.expression.compat.Resolvable;
+import build.base.expression.compat.Variable;
 import build.base.foundation.Introspection;
 import build.base.foundation.Preconditions;
 import build.base.foundation.Strings;

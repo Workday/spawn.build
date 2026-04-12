@@ -25,7 +25,7 @@ import build.base.configuration.CollectedOption;
 import build.base.configuration.Configuration;
 import build.base.configuration.ConfigurationBuilder;
 import build.base.configuration.Option;
-import build.base.expression.Processor;
+import build.base.expression.compat.Processor;
 import build.base.expression.option.ResolvableOption;
 import build.base.option.JDKVersion;
 import build.spawn.application.Platform;

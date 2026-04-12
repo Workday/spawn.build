@@ -22,7 +22,7 @@ package build.spawn.option;
 
 import build.base.configuration.MappedOption;
 import build.base.configuration.Option;
-import build.base.expression.Processor;
+import build.base.expression.compat.Processor;
 import build.base.expression.option.ResolvableOption;
 import build.base.table.Table;
 import build.base.table.Tabular;
