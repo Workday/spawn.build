@@ -68,9 +68,9 @@
 
         <!-- Module Dependency Versions -->
         <assertj.version>3.27.7</assertj.version>
-        <base.version>0.22.0</base.version>
+        <base.version>0.22.1</base.version>
         <byte-buddy.version>1.18.4</byte-buddy.version>
-        <codemodel.version>0.20.0</codemodel.version>
+        <codemodel.version>0.20.1</codemodel.version>
         <jackson-core.version>2.21.2</jackson-core.version>
         <junit.version>6.0.3</junit.version>
         <jakarta-inject.version>2.0.1</jakarta-inject.version>
@@ -108,12 +108,178 @@
     </modules>
 
     <dependencyManagement>
-        <!-- Force Certain Dependencies to use Specific Versions for Java Platform -->
         <dependencies>
+            <!-- Intra-project modules -->
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-option</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-application</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-application-composition</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-jdk</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-local-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-local-jdk</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-docker</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.spawn</groupId>
+                <artifactId>spawn-docker-jdk</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- Upstream: base.build -->
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-archiving</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-assertion</artifactId>
+                <version>${base.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-commandline</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-configuration</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-expression</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-flow</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-foundation</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-io</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-logging</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-naming</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-network</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-option</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-table</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+
+            <!-- Upstream: codemodel.build -->
+            <dependency>
+                <groupId>build.codemodel</groupId>
+                <artifactId>codemodel-foundation</artifactId>
+                <version>${codemodel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.codemodel</groupId>
+                <artifactId>dependency-injection</artifactId>
+                <version>${codemodel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>build.codemodel</groupId>
+                <artifactId>jdk-codemodel</artifactId>
+                <version>${codemodel.version}</version>
+            </dependency>
+
+            <!-- Third-party -->
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
                 <version>${byte-buddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>${jakarta-inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -125,8 +291,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <parameters>true</parameters>
                     <testCompilerArgument>-parameters</testCompilerArgument>
                 </configuration>
@@ -334,13 +499,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-            </plugin>
-
         </plugins>
     </build>
 
