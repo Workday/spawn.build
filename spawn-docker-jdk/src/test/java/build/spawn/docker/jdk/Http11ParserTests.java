@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class Http11ParserTest {
+class Http11ParserTests {
 
     @Test
     void shouldParseStatusCode200() throws IOException {

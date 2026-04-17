@@ -14,7 +14,7 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JavaHttpClientTransportTest {
+class JavaHttpClientTransportTests {
 
     private HttpServer server;
     private JavaHttpClientTransport transport;

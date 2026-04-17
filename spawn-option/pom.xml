@@ -19,19 +19,16 @@
         <dependency>
             <groupId>build.base</groupId>
             <artifactId>base-configuration</artifactId>
-            <version>${base.version}</version>
         </dependency>
 
         <dependency>
             <groupId>build.base</groupId>
             <artifactId>base-expression</artifactId>
-            <version>${base.version}</version>
         </dependency>
 
         <dependency>
             <groupId>build.base</groupId>
             <artifactId>base-table</artifactId>
-            <version>${base.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
