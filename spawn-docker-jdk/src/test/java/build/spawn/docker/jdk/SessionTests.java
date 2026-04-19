@@ -636,10 +636,10 @@ class SessionTests {
 
         try (var session = createSession()) {
             final var image = session.images()
-                .get(RABBITMQ_IMAGE)
+                .get(ALPINE_IMAGE)
                 .orElseThrow(() -> new AssertionError("Failed to get the required image"));
 
-            try (var container = image.start()) {
+            try (var container = image.start(Command.of("sleep", "60"))) {
 
                 Eventually.assertThat(container.onStart())
                     .isCompleted();
@@ -650,12 +650,18 @@ class SessionTests {
                 assertThat(container.id())
                     .isNotNull();
 
-                // create a /tmp/test folder in the container
-                Eventually.assertThat(container
-                        .createExecutable("mkdir", "/tmp/test")
-                        .execute()
-                        .onExit())
+                // create a /tmp/test folder in the container; withTerminal(true) ensures Detach:false so
+                // onExit() tracks actual process completion rather than just exec launch
+                final var mkdirExecution = container
+                    .createExecutable("mkdir", "/tmp/test")
+                    .withTerminal(true)
+                    .execute();
+
+                Eventually.assertThat(mkdirExecution.onExit())
                     .isCompleted();
+
+                assertThat(mkdirExecution.exitValue().getAsInt())
+                    .isEqualTo(0);
 
                 // establish a temporary folder and a temporary file in the folder, tar the folder and send it to the
 
