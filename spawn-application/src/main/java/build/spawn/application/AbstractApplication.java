@@ -30,6 +30,7 @@ import build.spawn.application.option.StandardOutputFormatter;
 import build.spawn.application.option.StandardOutputSubscriber;
 import jakarta.inject.Inject;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -80,7 +81,7 @@ public abstract class AbstractApplication
      * The {@link Lifecycle}s this {@link Application} must respect.
      */
     @Inject
-    private Iterable<Lifecycle<?>> lifecycles;
+    private Iterable<Lifecycle<?>> lifecycles = List.of();
 
     /**
      * Constructs the {@link Application}.
