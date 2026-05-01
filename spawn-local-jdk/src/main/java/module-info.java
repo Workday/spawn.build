@@ -43,4 +43,7 @@ open module build.spawn.platform.local.jdk {
 
     provides build.spawn.platform.local.jdk.JDKDetector
         with build.spawn.platform.local.jdk.JDKHomeBasedPatternDetector;
+
+    provides build.spawn.application.LauncherRegistration
+        with build.spawn.platform.local.jdk.LocalJDKLauncherRegistration;
 }
