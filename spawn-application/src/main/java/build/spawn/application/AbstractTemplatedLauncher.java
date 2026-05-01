@@ -23,7 +23,6 @@ package build.spawn.application;
 import build.base.commandline.CommandLine;
 import build.base.configuration.Configuration;
 import build.base.configuration.ConfigurationBuilder;
-import build.base.foundation.Introspection;
 import build.base.logging.Logger;
 import build.base.naming.UniqueNameGenerator;
 import build.base.option.TemporaryDirectory;
@@ -34,7 +33,6 @@ import build.base.table.option.CellSeparator;
 import build.base.table.option.RowComparator;
 import build.base.table.option.TableName;
 import build.codemodel.foundation.usage.GenericTypeUsage;
-import build.codemodel.foundation.usage.NamedTypeUsage;
 import build.codemodel.injection.Binding;
 import build.codemodel.injection.Context;
 import build.codemodel.injection.Dependency;
@@ -52,6 +50,7 @@ import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -243,10 +242,7 @@ public abstract class AbstractTemplatedLauncher<A extends Application, P extends
 
         // allow the process interfaces to be used for injection
         launchContext.bind((Class) process.getClass()).to(process);
-
-        Introspection.getAll(process.getClass(), Class::getInterfaces)
-            .filter(i -> !i.equals(Addressable.class))
-            .forEach(i -> launchContext.bind((Class) i).to(process));
+        launchContext.bind(process).asAllInterfaces(i -> !i.equals(Addressable.class));
 
         // instantiate individual facets
         final Set<Facet<?>> facets = launchOptions.stream(Facet.class)
@@ -254,57 +250,33 @@ public abstract class AbstractTemplatedLauncher<A extends Application, P extends
             .map(facet -> {
                 final Object implementation = facet.getFactory().apply(launchContext);
 
-                // allow injection of facets
+                // allow injection of facets individually and as Iterable<T>
                 launchContext.bind((Class<Object>) facet.getInterface()).to(implementation);
+                launchContext.bindSet((Class<Object>) facet.getInterface()).add(implementation);
 
                 // create a synthetic Facet that always resolves to the same implementation
                 return Facet.of(facet.getInterface(), _ -> facet.getInterface().cast(implementation));
             })
             .collect(Collectors.toSet());
 
-        // allow Iterable<T> to be resolved for injection where T is implemented by zero or more Facets.
+        // fallback: return an empty Iterable<T> for any T not populated via bindSet above
         launchContext.addResolver(new Resolver<Iterable<Object>>() {
             @Override
             public Optional<? extends Binding<Iterable<Object>>> resolve(final Dependency dependency) {
-
                 if (dependency.typeUsage() instanceof GenericTypeUsage genericTypeUsage
                     && genericTypeUsage.typeName().canonicalName().equals(Iterable.class.getCanonicalName())
                     && genericTypeUsage.parameters().count() == 1) {
-
-                    final var parameterTypeUsage = genericTypeUsage.parameters()
-                        .findFirst()
-                        .orElseThrow();
-
-                    if (parameterTypeUsage instanceof NamedTypeUsage namedTypeUsage) {
-                        try {
-                            final var parameterClass = this.getClass()
-                                .getClassLoader()
-                                .loadClass(namedTypeUsage.typeName().canonicalName());
-
-                            // find the Facets that implement T
-                            final var list = facets.stream()
-                                .map(facet -> parameterClass.cast(facet.getFactory().apply(launchContext)))
-                                .filter(parameterClass::isInstance)
-                                .toList();
-
-                            return Optional.of(new ValueBinding<Iterable<Object>>() {
-                                @Override
-                                @SuppressWarnings("unchecked")
-                                public Iterable<Object> value() {
-                                    return (Iterable<Object>) list;
-                                }
-
-                                @Override
-                                public Dependency dependency() {
-                                    return dependency;
-                                }
-                            });
+                    return Optional.of(new ValueBinding<Iterable<Object>>() {
+                        @Override
+                        public Iterable<Object> value() {
+                            return List.of();
                         }
-                        catch (final ClassNotFoundException e) {
-                            LOGGER.debug("Could not load class [{0}] for Iterable injection resolution",
-                                namedTypeUsage.typeName().canonicalName(), e);
+
+                        @Override
+                        public Dependency dependency() {
+                            return dependency;
                         }
-                    }
+                    });
                 }
 
                 return Optional.empty();

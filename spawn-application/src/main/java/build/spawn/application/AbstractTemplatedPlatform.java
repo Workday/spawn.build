@@ -172,7 +172,6 @@ public abstract class AbstractTemplatedPlatform
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Context createContext(final Class<? extends Application> applicationClass,
                                  final Configuration configuration) {
 
@@ -189,8 +188,7 @@ public abstract class AbstractTemplatedPlatform
         context.bind(InjectionFramework.class).to(this.injectionFramework);
 
         // allow all interfaces of the Platform to be injected
-        Introspection.getAll(getClass(), Class::getInterfaces)
-            .forEach(i -> context.bind((Class) i).to(this));
+        context.bind(this).asAllInterfaces();
 
         // allows the Platform Server to be injected
         context.bind(Server.class).to(this.server);
