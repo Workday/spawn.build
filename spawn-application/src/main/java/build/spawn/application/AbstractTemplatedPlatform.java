@@ -39,45 +39,29 @@ import build.codemodel.foundation.naming.CachingNameProvider;
 import build.codemodel.foundation.naming.NonCachingNameProvider;
 import build.codemodel.injection.ConfigurationResolver;
 import build.codemodel.injection.Context;
-import build.codemodel.injection.InjectionException;
 import build.codemodel.injection.InjectionFramework;
 import build.codemodel.jdk.JDKCodeModel;
 import build.spawn.application.option.LaunchIdentity;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * An abstract {@link TemplatedPlatform} that automatically detects the supported {@link Class}es of
- * {@link Application}s and associated {@link Launcher}s by loading and parsing properties files
- * (named using the concrete implementation of this {@link Class}) located in {@code META-INF/} folders on the
- * classpath.
+ * {@link Application}s and associated {@link Launcher}s via {@link java.util.ServiceLoader} discovery of
+ * {@link LauncherRegistration} providers.
  * <p>
- * The properties files define key-value pairs where each key is a fully-qualified-class-name for a {@link Class}
- * of {@link Application} and the corresponding value is the {@link Class} of {@link Launcher} to launch
- * said {@link Class}es of {@link Application} with the {@link Platform}.
- * <p>
- * For example, the {@code META-INF/build.spawn.local.LocalMachine} properties file for the
- * {@code LocalMachine} defines the following entries.
- * <code>
- * build.spawn.application.Application=build.spawn.local.LocalLauncher
- * build.spawn.application.java.JavaApplication=build.spawn.java.LocalJavaLauncher
- * </code>
+ * Modules that wish to register a {@link Launcher} for a specific platform declare a {@link LauncherRegistration}
+ * implementation and register it with {@code provides LauncherRegistration with ...} in their {@code module-info}.
  *
  * @author brian.oliver
  * @since Oct-2018
@@ -104,7 +88,7 @@ public abstract class AbstractTemplatedPlatform
      * The {@link Launcher}s by {@link Class} of {@link Application} that are supported
      * for this {@link Platform}.
      */
-    private final LinkedHashMap<Class<? extends Application>, Class<? extends Launcher>> launchers;
+    private final LinkedHashMap<Class<? extends Application>, Class<? extends Launcher<?, ?>>> launchers;
 
     /**
      * The {@link Server} that {@link Application}s may use to communicate with this {@link Platform}.
@@ -157,107 +141,14 @@ public abstract class AbstractTemplatedPlatform
             throw new RuntimeException("Failed to create " + getClass().getCanonicalName(), e);
         }
 
-        // determine the launchers supported by this platform
+        // determine the launchers supported by this platform via ServiceLoader discovery
         this.launchers = new LinkedHashMap<>();
 
-        // attempt to load the properties file defining the launchers for this class of platform
-        final String path = "META-INF/" + getClass().getName();
-
-        final String platformClassName = getClass().getCanonicalName();
-        LOGGER.debug("Locating Application Launchers for {} in {} (as System Resources)", platformClassName, path);
-
-        try {
-            // determine the properties files defining launchers for the concrete type of platform
-            final List<URL> resources = Collections.list(ClassLoader.getSystemResources(path));
-
-            LOGGER.debug("Located {} System Resource(s) defining Application Launchers", resources.size());
-
-            // attempt to find the Launcher for the class of Application
-            for (final URL resource : resources) {
-
-                LOGGER.debug("Loading Application Launcher(s) from {}", resource);
-
-                try (LineNumberReader reader = new LineNumberReader(
-                    new BufferedReader(new InputStreamReader(resource.openStream())))) {
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-
-                        line = Strings.trim(line);
-
-                        if (!line.startsWith("#") && !Strings.isEmpty(line)) {
-                            final String[] parts = line.split("=");
-
-                            // the optionally detected name of the class for launching the application
-                            Optional<String> launcherClassName = Optional.empty();
-
-                            // by default we assume the specified launcher is for all classes of Application
-                            Class<? extends Application> applicationClass = Application.class;
-
-                            if (parts.length == 1) {
-                                // when there's only a single parameter, assume that is the launcher
-                                launcherClassName = Optional.of(Strings.trim(parts[0]));
-                            } else if (parts.length == 2) {
-                                // when there's a "key=value", the key is the application and the value is the launcher
-                                final String specifiedClassName = Strings.trim(parts[0]);
-
-                                try {
-                                    final Class<?> specifiedClass = Class.forName(specifiedClassName);
-
-                                    if (Application.class.isAssignableFrom(specifiedClass)) {
-                                        applicationClass = (Class<? extends Application>) specifiedClass;
-                                        launcherClassName = Optional.of(Strings.trim(parts[1]));
-                                    } else {
-                                        LOGGER.warn("The specified class [{}] in [{}] at line [{}] is not an {}.",
-                                            launcherClassName.get(), resource, reader.getLineNumber(),
-                                            Application.class.getCanonicalName());
-                                    }
-                                } catch (final ClassNotFoundException e) {
-                                    LOGGER.warn("The specified class [{}] in [{}] at line [{}] is not found.",
-                                        specifiedClassName, resource, reader.getLineNumber());
-                                }
-                            } else {
-                                // the file isn't formatted correctly!
-                                LOGGER.warn(
-                                    "Invalid property definition detected in [{}] for [{}] at line [{}].\nLine:{}",
-                                    resource, platformClassName, reader.getLineNumber(), line);
-                            }
-
-                            if (launcherClassName.isPresent()) {
-                                try {
-                                    final Class<?> launcherClass = Class.forName(launcherClassName.get());
-
-                                    if (Launcher.class.isAssignableFrom(launcherClass)) {
-
-                                        LOGGER.trace("[{}] classes will use [{}] for launching on [{}]",
-                                            applicationClass, launcherClass, platformClassName);
-
-                                        // remember the launcher for this platform
-                                        this.launchers.put(applicationClass,
-                                            (Class<? extends Launcher>) launcherClass);
-                                    } else {
-                                        LOGGER.warn("The specified class [{}] in [{}] at line [{}] is not a {}",
-                                            launcherClassName.get(), resource, reader.getLineNumber(),
-                                            Launcher.class);
-                                    }
-                                } catch (final InjectionException e) {
-                                    LOGGER.warn(
-                                        "The specified class [{}] in [{}] at line [{}] could not be created. The"
-                                            + " launcher will not be available", launcherClassName.get(), resource,
-                                        reader.getLineNumber(), e);
-                                } catch (final ClassNotFoundException e) {
-                                    LOGGER.warn("The specified class [{}] in [{}] at line [{}] is not found.  The "
-                                            + "launcher will not be available", launcherClassName.get(), resource,
-                                        reader.getLineNumber(), e);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (final IOException e) {
-            LOGGER.warn("Failed to determine System Resources for [{}]", path, e);
-        }
+        ServiceLoader.load(LauncherRegistration.class, getClass().getClassLoader())
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(reg -> reg.platformClass().equals(getClass()))
+            .forEach(reg -> this.launchers.put(reg.applicationClass(), reg.launcherClass()));
     }
 
     @Override
@@ -430,15 +321,15 @@ public abstract class AbstractTemplatedPlatform
             // determine the class of Launcher for the Application
             //
             // IMPORTANT: use min() to select the most specific (most derived) registered application class,
-            // NOT findFirst(). The launchers map is a LinkedHashMap populated by iterating META-INF resource
-            // files in classpath order. Using findFirst() meant that whichever jar appeared earlier on the
-            // classpath determined the launcher — e.g. if spawn-local-platform appeared before spawn-local-jdk,
+            // NOT findFirst(). The launchers map is a LinkedHashMap populated by iterating ServiceLoader
+            // registrations in discovery order. Using findFirst() meant that whichever module was discovered
+            // first determined the launcher — e.g. if spawn-local-platform was discovered before spawn-local-jdk,
             // then Application→LocalLauncher would win over JDKApplication→LocalJDKLauncher for any
             // JDKApplication subclass. This caused silent, order-dependent failures that were extremely hard
             // to diagnose (the symptom was "Failed to provide or determine the Executable to launch" or
             // the JVM receiving program arguments as JVM flags). Using min() with class hierarchy ordering
-            // ensures the most derived registered type always wins, regardless of classpath order.
-            final Class<? extends Launcher> launcherClass = this.launchers.entrySet()
+            // ensures the most derived registered type always wins, regardless of discovery order.
+            final Class<? extends Launcher<?, ?>> launcherClass = this.launchers.entrySet()
                 .stream()
                 .filter(e -> e.getKey().isAssignableFrom(applicationClass))
                 .min((a, b) -> a.getKey().isAssignableFrom(b.getKey()) ? 1 : -1)
@@ -449,7 +340,8 @@ public abstract class AbstractTemplatedPlatform
                             + applicationClass.getCanonicalName()));
 
             // establish the Application.Launcher
-            final Launcher<A, Platform> launcher = context.create(launcherClass);
+            @SuppressWarnings("unchecked")
+            final Launcher<A, Platform> launcher = (Launcher<A, Platform>) context.create(launcherClass);
 
             // establish the launch Configuration
             final var launchConfiguration = launchConfigurationBuilder.build();

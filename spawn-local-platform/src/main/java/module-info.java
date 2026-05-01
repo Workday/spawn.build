@@ -30,4 +30,7 @@ open module build.spawn.platform.local {
     requires transitive build.spawn.application;
 
     exports build.spawn.platform.local;
+
+    provides build.spawn.application.LauncherRegistration
+        with build.spawn.platform.local.LocalLauncherRegistration;
 }

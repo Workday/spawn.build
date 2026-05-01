@@ -47,4 +47,6 @@ open module build.spawn.application {
     exports build.spawn.application.console;
     exports build.spawn.application.facet;
     exports build.spawn.application.option;
+
+    uses build.spawn.application.LauncherRegistration;
 }
