@@ -1,6 +1,8 @@
 package build.spawn.docker.jdk.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import build.base.json.Json;
+import build.base.json.JsonObject;
+import build.base.json.JsonValue;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -23,18 +25,68 @@ class ContainerInformationTests {
      */
     @Test
     void nameShouldReturnUnquotedContainerName() throws Exception {
-        final var objectMapper = new ObjectMapper();
-        final var jsonNode = objectMapper.createObjectNode();
-        jsonNode.put("Name", "/my-container");
+        final JsonValue jsonValue = JsonObject.builder()
+            .put("Name", "/my-container")
+            .build();
 
         final var info = new ContainerInformation();
 
-        // inject the JsonNode via reflection — AbstractJsonBasedResult is an open module
-        final Field field = AbstractJsonBasedResult.class.getDeclaredField("jsonNode");
+        final Field field = AbstractJsonBasedResult.class.getDeclaredField("jsonValue");
         field.setAccessible(true);
-        field.set(info, jsonNode);
+        field.set(info, jsonValue);
 
-        // name() must return the plain text, not the JSON-serialized form including quotes
         assertThat(info.name()).isEqualTo("/my-container");
+    }
+
+    @Test
+    void ipAddressShouldReturnEmptyStringWhenJsonNull() throws Exception {
+        final JsonValue jsonValue = Json.parse("{\"NetworkSettings\":{\"IPAddress\":null}}");
+
+        final var info = new ContainerInformation();
+
+        final Field field = AbstractJsonBasedResult.class.getDeclaredField("jsonValue");
+        field.setAccessible(true);
+        field.set(info, jsonValue);
+
+        assertThat(info.ipAddress()).isEmpty();
+    }
+
+    @Test
+    void publishedPortsShouldReturnEmptyStreamWhenPortsIsJsonNull() throws Exception {
+        final JsonValue jsonValue = Json.parse("{\"NetworkSettings\":{\"Ports\":null}}");
+
+        final var info = new ContainerInformation();
+
+        final Field field = AbstractJsonBasedResult.class.getDeclaredField("jsonValue");
+        field.setAccessible(true);
+        field.set(info, jsonValue);
+
+        assertThat(info.publishedPorts()).isEmpty();
+    }
+
+    @Test
+    void linksShouldReturnEmptyStreamWhenLinksIsJsonNull() throws Exception {
+        final JsonValue jsonValue = Json.parse("{\"HostConfig\":{\"Links\":null}}");
+
+        final var info = new ContainerInformation();
+
+        final Field field = AbstractJsonBasedResult.class.getDeclaredField("jsonValue");
+        field.setAccessible(true);
+        field.set(info, jsonValue);
+
+        assertThat(info.links()).isEmpty();
+    }
+
+    @Test
+    void pidShouldReturnNegativeOneWhenAbsent() throws Exception {
+        final JsonValue jsonValue = JsonObject.builder().build();
+
+        final var info = new ContainerInformation();
+
+        final Field field = AbstractJsonBasedResult.class.getDeclaredField("jsonValue");
+        field.setAccessible(true);
+        field.set(info, jsonValue);
+
+        assertThat(info.pid()).isEqualTo(-1L);
     }
 }

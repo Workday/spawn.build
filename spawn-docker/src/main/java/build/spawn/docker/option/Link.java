@@ -21,9 +21,6 @@ package build.spawn.docker.option;
  */
 
 import build.base.configuration.CollectedOption;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -34,7 +31,7 @@ import java.util.Objects;
  * @author anand.sankaran
  * @since Aug-2022
  */
-public class Link
+public final class Link
     implements DockerOption, CollectedOption<LinkedHashSet> {
 
     /**
@@ -61,27 +58,6 @@ public class Link
 
         this.existingNameOrId = existingNameOrId;
         this.nameToLink = nameToLink;
-    }
-
-    @Override
-    public void configure(final ObjectNode objectNode, final ObjectMapper objectMapper) {
-
-        // ensure the "HostConfig" exists an ObjectNode
-        final ObjectNode hostConfig = objectNode.get("HostConfig") == null
-            || !(objectNode.get("HostConfig") instanceof ObjectNode)
-            ? objectMapper.createObjectNode()
-            : (ObjectNode) objectNode.get("HostConfig");
-
-        // ensure the "Links" exists as an ObjectNode
-        final ArrayNode links = hostConfig.get("Links") == null
-            || !(hostConfig.get("Links") instanceof ArrayNode)
-            ? objectMapper.createArrayNode()
-            : (ArrayNode) hostConfig.get("Links");
-
-        links.add(this.existingNameOrId + ":" + this.nameToLink);
-
-        hostConfig.set("Links", links);
-        objectNode.set("HostConfig", hostConfig);
     }
 
     @Override

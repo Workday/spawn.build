@@ -37,7 +37,7 @@ open module build.spawn.docker.jdk {
     requires jdk.httpserver;
     requires jakarta.inject;
     requires build.base.io;
-    requires com.fasterxml.jackson.databind;
+    requires build.base.json;
     requires build.base.archiving;
     requires build.base.option;
     requires build.base.flow;

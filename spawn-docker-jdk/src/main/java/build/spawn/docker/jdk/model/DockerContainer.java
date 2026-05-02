@@ -28,6 +28,8 @@ import build.base.flow.FilteringSubscriber;
 import build.base.flow.MappingSubscriber;
 import build.base.flow.Publisher;
 import build.base.io.Terminal;
+import build.base.json.JsonNumber;
+import build.base.json.JsonString;
 import build.codemodel.injection.Context;
 import build.codemodel.injection.PostInject;
 import build.spawn.docker.Container;
@@ -127,8 +129,8 @@ public class DockerContainer
         // (so that it may be injected into anything, like Commands, that use this Context)
         this.context.bind(Container.class).to(this);
 
-        // obtain the identity for the Container from the JsonNode
-        this.id = jsonNode().get("Id").asText();
+        // obtain the identity for the Container from the JsonValue
+        this.id = jsonValue().getString("Id");
 
         System.out.println("Created Container: " + this.id.substring(this.id.length() - 8));
 
@@ -139,7 +141,7 @@ public class DockerContainer
             FilteringSubscriber.of(ActionEvent.class::isInstance,
                 MappingSubscriber.of(ActionEvent.class::cast,
                     FilteringSubscriber.of(
-                        event -> event.actor().get("ID").asText().equals(this.id),
+                        event -> event.actor().getString("ID").equals(this.id),
                         this.completingSubscriber))));
 
         // establish the CompletableFuture to identify when the Container has started
@@ -152,14 +154,17 @@ public class DockerContainer
 
         // establish the CompletableFuture to identify when the Container has terminated (died)
         this.onExit = this.completingSubscriber.when(event -> {
-                final var jsonNode = event.jsonNode();
                 final var action = event.action();
 
                 if ("die".equals(action)) {
-                    // extract the exitCode as the exitValue for the Container
-                    final var exitCode = event.actor().get("Attributes").get("exitCode");
-                    this.exitValue = exitCode.isMissingNode() ? null : exitCode.asInt();
-
+                    final var attributes = event.actor().get("Attributes").asObject().members();
+                    final var exitCode = attributes.get("exitCode");
+                    this.exitValue = switch (exitCode) {
+                        case JsonNumber n -> n.toNumber().intValue();
+                        case JsonString s -> Integer.parseInt(s.value());
+                        case null -> null;
+                        default -> null;
+                    };
                     return true;
                 }
 
@@ -167,19 +172,12 @@ public class DockerContainer
             },
             _ -> {
                 System.out.println("Exited Container: " + this.id.substring(this.id.length() - 8));
-
                 return this;
             });
 
         this.exitValue = null;
     }
 
-    /**
-     * Creates a new dependency injection {@link Context}, based on the {@link Context} used to
-     * create the {@link Container}.
-     *
-     * @return a new {@link Context}
-     */
     protected Context createContext() {
         return this.context.newContext();
     }
@@ -224,7 +222,6 @@ public class DockerContainer
 
     @Override
     public Executable createExecutable(final Command command) {
-        // establish the ConfigurationBuilder for the Execution of our command
         final var options = ConfigurationBuilder.create()
             .add(command);
 
@@ -306,7 +303,7 @@ public class DockerContainer
     public CompletableFuture<Container> pause() {
         // establish a CompletableFuture to notify when the Container has been paused
         final CompletableFuture<Container> future = this.completingSubscriber
-            .when(event -> "pause".equals(event.jsonNode().get("Action").asText()), __ -> this);
+            .when(event -> "pause".equals(event.jsonValue().getString("Action")), __ -> this);
 
         createContext()
             .create(PauseContainer.class)
@@ -319,7 +316,7 @@ public class DockerContainer
     public CompletableFuture<Container> unpause() {
         // establish a CompletableFuture to notify when the Container has been unpaused
         final CompletableFuture<Container> future = this.completingSubscriber
-            .when(event -> "unpause".equals(event.jsonNode().get("Action").asText()), __ -> this);
+            .when(event -> "unpause".equals(event.jsonValue().getString("Action")), __ -> this);
 
         createContext()
             .create(UnpauseContainer.class)

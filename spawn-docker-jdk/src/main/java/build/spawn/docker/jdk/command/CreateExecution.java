@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,14 +22,12 @@ package build.spawn.docker.jdk.command;
 
 import build.base.configuration.Configuration;
 import build.base.io.Terminal;
+import build.base.json.Json;
+import build.base.json.JsonArray;
+import build.base.json.JsonObject;
 import build.spawn.docker.Container;
 import build.spawn.docker.Execution;
 import build.spawn.docker.jdk.HttpTransport;
-import build.spawn.docker.option.DockerOption;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,12 +42,6 @@ import java.util.Objects;
  */
 public class CreateExecution
     extends AbstractBlockingCommand<String> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The {@link Container} in which the {@code exec} will be created.
@@ -86,19 +78,24 @@ public class CreateExecution
     protected HttpTransport.Request createRequest() {
 
         // establish an ObjectNode containing the containers/create json
-        final ObjectNode node = this.objectMapper.createObjectNode();
-        node.put("AttachStdin", false);
-        node.put("AttachStdout", this.terminalRequired);
-        node.put("AttachStderr", this.terminalRequired);
-        node.put("Tty", false);
+        final var nodeBuilder = JsonObject.builder()
+            .put("AttachStdin", false)
+            .put("AttachStdout", this.terminalRequired)
+            .put("AttachStderr", this.terminalRequired)
+            .put("Tty", false);
 
-        // allow the DockerOptions to configure the ObjectNode
-        this.configuration.stream(DockerOption.class)
-            .forEach(option -> option.configure(node, this.objectMapper));
+        // Cmd — only Command options apply here
+        this.configuration.stream(build.spawn.docker.option.Command.class)
+            .findFirst()
+            .ifPresent(cmd -> {
+                final var arr = JsonArray.builder();
+                cmd.values().forEach(arr::add);
+                nodeBuilder.put("Cmd", arr.build());
+            });
 
         return HttpTransport.Request
             .post("/containers/" + this.container.id() + "/exec",
-                node.toString().getBytes(StandardCharsets.UTF_8))
+                nodeBuilder.build().toJsonString().getBytes(StandardCharsets.UTF_8))
             .withContentType("application/json");
     }
 
@@ -106,11 +103,7 @@ public class CreateExecution
     protected String createResult(final HttpTransport.Response response)
         throws IOException {
 
-        // bind the JsonNode representation of the response
-        final String json = response.bodyString();
-        final JsonNode node = this.objectMapper.readTree(json);
-
         // obtain the Execution identity to return
-        return node.get("Id").asText();
+        return Json.parse(response.bodyString()).getString("Id");
     }
 }

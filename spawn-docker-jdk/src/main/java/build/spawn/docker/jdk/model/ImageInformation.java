@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.model;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,7 @@ import build.spawn.docker.Image;
 import build.spawn.docker.option.ExposedPort;
 
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * An internal implementation of {@link Image.Information}.
@@ -41,17 +38,16 @@ public class ImageInformation
 
     @Override
     public String imageId() {
-        return jsonNode().get("Id").asText();
+        return text("Id");
     }
 
     @Override
     public Stream<ExposedPort> exposedPorts() {
-        return StreamSupport
-            .stream(
-                Spliterators.spliteratorUnknownSize(
-                    jsonNode().at("/Config/ExposedPorts").fieldNames(),
-                    Spliterator.IMMUTABLE),
-                false)
+        final var portsNode = at("Config", "ExposedPorts");
+        if (portsNode == null) {
+            return Stream.empty();
+        }
+        return portsNode.asObject().members().keySet().stream()
             .map(ExposedPort::of)
             .filter(Optional::isPresent)
             .map(Optional::get);

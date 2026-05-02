@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,10 @@ package build.spawn.docker.jdk.command;
  */
 
 import build.base.configuration.Configuration;
+import build.base.json.Json;
+import build.base.json.JsonArray;
+import build.base.json.JsonObject;
+import build.base.json.JsonValue;
 import build.base.naming.UniqueNameGenerator;
 import build.base.option.HostName;
 import build.codemodel.injection.Context;
@@ -28,21 +32,22 @@ import build.spawn.docker.Container;
 import build.spawn.docker.Image;
 import build.spawn.docker.jdk.HttpTransport;
 import build.spawn.docker.jdk.model.DockerContainer;
+import build.spawn.docker.option.Bind;
 import build.spawn.docker.option.ContainerName;
 import build.spawn.docker.option.DockerOption;
 import build.spawn.docker.option.ExposedPort;
+import build.spawn.docker.option.ExtraHost;
+import build.spawn.docker.option.Link;
 import build.spawn.docker.option.NetworkName;
 import build.spawn.docker.option.PublishAllPorts;
 import build.spawn.docker.option.PublishPort;
 import build.spawn.option.EnvironmentVariable;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.inject.Inject;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /**
@@ -54,12 +59,6 @@ import java.util.Objects;
  */
 public class CreateContainer
     extends AbstractBlockingCommand<Container> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The {@link Image} for which to create the {@link Container}.
@@ -100,54 +99,116 @@ public class CreateContainer
     @Override
     protected HttpTransport.Request createRequest() {
 
-        // establish an ObjectNode containing the containers/create json
-        final var node = this.objectMapper.createObjectNode();
-        node.put("Image", this.image.id());
+        final var nodeBuilder = JsonObject.builder();
+        nodeBuilder.put("Image", this.image.id());
 
-        // allow the DockerOptions to configure the ObjectNode
-        this.configuration.stream(DockerOption.class)
-            .forEach(option -> option.configure(node, this.objectMapper));
+        this.configuration.getOptionalValue(HostName.class)
+            .ifPresent(h -> nodeBuilder.put("Hostname", h));
 
-        // configure docker environment variables node
-        this.configuration.stream(EnvironmentVariable.class)
-            .forEach(envVar -> {
-                final ArrayNode arrayNode = getOrCreateArray(node, "Env");
-                arrayNode.add(envVar.key() + "=" + envVar.value().orElse(""));
+        final var envList = this.configuration.stream(EnvironmentVariable.class)
+            .map(e -> e.key() + "=" + e.value().orElse(""))
+            .toList();
+        if (!envList.isEmpty()) {
+            nodeBuilder.put("Env", JsonArray.builder().addAll(envList).build());
+        }
+
+        // Accumulate each DockerOption type; the exhaustive switch enforces that new
+        // permitted subtypes are handled here at compile time.
+        final var cmdList = new ArrayList<String>();
+        final var exposedPortList = new ArrayList<ExposedPort>();
+        final var bindList = new ArrayList<Bind>();
+        final var linkList = new ArrayList<Link>();
+        final var extraHostList = new ArrayList<ExtraHost>();
+        final var publishPortList = new ArrayList<PublishPort>();
+        PublishAllPorts publishAllPorts = null;
+
+        for (final DockerOption option : this.configuration.stream(DockerOption.class).toList()) {
+            var _ = switch (option) {
+                case build.spawn.docker.option.Command c -> cmdList.addAll(c.values());
+                case ExposedPort ep -> exposedPortList.add(ep);
+                case Bind b -> bindList.add(b);
+                case Link l -> linkList.add(l);
+                case ExtraHost h -> extraHostList.add(h);
+                case PublishPort pp -> publishPortList.add(pp);
+                case PublishAllPorts p -> {
+                    publishAllPorts = p;
+                    yield true;
+                }
+            };
+        }
+
+        if (!cmdList.isEmpty()) {
+            nodeBuilder.put("Cmd", JsonArray.builder().addAll(cmdList).build());
+        }
+
+        if (!exposedPortList.isEmpty()) {
+            final var obj = JsonObject.builder();
+            exposedPortList.forEach(ep ->
+                obj.put(ep.port() + "/" + ep.type().toString().toLowerCase(), JsonObject.builder().build()));
+            nodeBuilder.put("ExposedPorts", obj.build());
+        }
+
+        final var hostConfigBuilder = JsonObject.builder();
+
+        if (!bindList.isEmpty()) {
+            hostConfigBuilder.put("Binds", JsonArray.builder().addAll(
+                bindList.stream().map(b -> b.externalPath() + ":" + b.internalPath()).toList()).build());
+        }
+
+        if (!linkList.isEmpty()) {
+            hostConfigBuilder.put("Links", JsonArray.builder().addAll(
+                linkList.stream().map(l -> l.existingNameOrId() + ":" + l.nameToLink()).toList()).build());
+        }
+
+        if (!extraHostList.isEmpty()) {
+            hostConfigBuilder.put("ExtraHosts", JsonArray.builder().addAll(
+                extraHostList.stream().map(ExtraHost::get).toList()).build());
+        }
+
+        if (!publishPortList.isEmpty()) {
+            final var grouped = new LinkedHashMap<String, ArrayList<PublishPort>>();
+            publishPortList.forEach(pb -> {
+                final String key = pb.port() + "/" + pb.type().toString().toLowerCase();
+                grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(pb);
             });
+            final var portBindingsObj = JsonObject.builder();
+            grouped.forEach((key, pbs) -> {
+                final var arr = JsonArray.builder();
+                for (final var pb : pbs) {
+                    final var addr = pb.getSocketAddress()
+                        .orElse(new InetSocketAddress("localhost", pb.port()));
+                    final var pbObj = JsonObject.builder()
+                        .put("HostPort", Integer.toString(addr.getPort()));
+                    if (!addr.getHostName().equals("localhost")) {
+                        pbObj.put("HostIp", addr.getHostName());
+                    }
+                    arr.add(pbObj.build());
+                }
+                portBindingsObj.put(key, arr.build());
+            });
+            hostConfigBuilder.put("PortBindings", portBindingsObj.build());
+        }
 
-        // configure network
+        if (publishAllPorts != null) {
+            hostConfigBuilder.put("PublishAllPorts", publishAllPorts.isEnabled());
+        }
+
         this.configuration.stream(NetworkName.class)
             .findFirst()
-            .ifPresent(networkName -> {
-                ObjectNode hostConfig = (ObjectNode) node.get("HostConfig");
-                if (hostConfig == null) {
-                    hostConfig = this.objectMapper.createObjectNode();
-                    node.set("HostConfig", hostConfig);
-                }
-                hostConfig.put("NetworkMode", networkName.get());
-            });
+            .ifPresent(n -> hostConfigBuilder.put("NetworkMode", n.get()));
 
-        // perform custom configuration (for non-DockerOptions)
-        this.configuration.getOptionalValue(HostName.class)
-            .ifPresent(hostName -> {
-                node.put("Hostname", hostName);
-            });
+        final var hostConfig = hostConfigBuilder.build();
+        if (!hostConfig.members().isEmpty()) {
+            nodeBuilder.put("HostConfig", hostConfig);
+        }
 
         final var name = this.configuration.getOptionalValue(ContainerName.class)
             .orElse(new UniqueNameGenerator(".").next());
 
         return HttpTransport.Request
             .post("/containers/create?name=" + name,
-                node.toString().getBytes(StandardCharsets.UTF_8))
+                nodeBuilder.build().toJsonString().getBytes(StandardCharsets.UTF_8))
             .withContentType("application/json");
-    }
-
-    private ArrayNode getOrCreateArray(final ObjectNode node, final String key) {
-        final var child = node.get(key);
-        if (child instanceof ArrayNode) {
-            return (ArrayNode) child;
-        }
-        return node.putArray(key);
     }
 
     @Override
@@ -159,9 +220,8 @@ public class CreateContainer
         context.bind(Context.class).to(context);
         context.bind(Configuration.class).to(this.configuration);
 
-        // bind the JsonNode representation of the response
-        final var json = response.bodyString();
-        context.bind(JsonNode.class).to(this.objectMapper.readTree(json));
+        // bind the JsonValue representation of the response
+        context.bind(JsonValue.class).to(Json.parse(response.bodyString()));
 
         // create the Container to return
         return context.create(DockerContainer.class);

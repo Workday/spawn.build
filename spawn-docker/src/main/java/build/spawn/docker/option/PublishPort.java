@@ -21,9 +21,6 @@ package build.spawn.docker.option;
  */
 
 import build.base.configuration.CollectedOption;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedHashSet;
@@ -124,47 +121,6 @@ public final class PublishPort
             + this.type.toString().toLowerCase()
             + this.socketAddress
             + '}';
-    }
-
-    @Override
-    public void configure(final ObjectNode objectNode, final ObjectMapper objectMapper) {
-
-        // ensure the "HostConfig" exists an ObjectNode
-        final ObjectNode hostConfig = objectNode.get("HostConfig") == null
-            || !(objectNode.get("HostConfig") instanceof ObjectNode)
-            ? objectMapper.createObjectNode()
-            : (ObjectNode) objectNode.get("HostConfig");
-
-        // ensure the "PortBindings" exists as an ObjectNode
-        final ObjectNode portBindings = hostConfig.get("PortBindings") == null
-            || !(hostConfig.get("PortBindings") instanceof ObjectNode)
-            ? objectMapper.createObjectNode()
-            : (ObjectNode) hostConfig.get("PortBindings");
-
-        final String key = this.port + "/" + this.type.toString().toLowerCase();
-
-        // ensure the PortBinding exists as an ArrayNode
-        final ArrayNode array = portBindings.get(key) == null
-            || !(portBindings.get(key) instanceof ArrayNode)
-            ? objectMapper.createArrayNode()
-            : (ArrayNode) portBindings.get(key);
-
-        // create the PortBinding
-        final ObjectNode portBinding = objectMapper.createObjectNode();
-        final InetSocketAddress address = this.socketAddress
-            .orElse(new InetSocketAddress("localhost", this.port));
-
-        if (!address.getHostName().equals("localhost")) {
-            portBinding.put("HostIp", address.getHostName());
-        }
-
-        portBinding.put("HostPort", Integer.toString(address.getPort()));
-
-        array.add(portBinding);
-
-        portBindings.set(key, array);
-        hostConfig.set("PortBindings", portBindings);
-        objectNode.set("HostConfig", hostConfig);
     }
 
     /**

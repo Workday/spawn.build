@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.model;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package build.spawn.docker.jdk.model;
  */
 
 import build.base.configuration.Configuration;
+import build.base.json.JsonString;
 import build.codemodel.injection.Context;
 import build.spawn.docker.Container;
 import build.spawn.docker.Image;
@@ -29,15 +30,11 @@ import build.spawn.docker.jdk.command.DeleteImage;
 import build.spawn.docker.jdk.command.InspectImage;
 import build.spawn.docker.jdk.command.StartContainer;
 import build.spawn.docker.option.ImageName;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.inject.Inject;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * An internal implementation of an {@link Image}.
@@ -120,14 +117,8 @@ public class DockerImage
             .submit()
             .map(ImageInformation.class::cast)
             .map(info ->
-                StreamSupport.stream(
-                        Spliterators.spliteratorUnknownSize(
-                            info.jsonNode()
-                                .get("RepoTags")
-                                .iterator(),
-                            Spliterator.ORDERED),
-                        false)
-                    .map(JsonNode::asText)
+                info.jsonValue().get("RepoTags").asArray().values().stream()
+                    .map(v -> v instanceof JsonString s ? s.value() : v.toJsonString())
                     .map(ImageName::of))
             .orElse(Stream.empty());
     }

@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,12 +22,10 @@ package build.spawn.docker.jdk.command;
 
 import build.base.configuration.Configuration;
 import build.base.flow.CompletingSubscriber;
+import build.base.json.JsonValue;
 import build.spawn.docker.Image;
 import build.spawn.docker.jdk.HttpTransport;
 import build.spawn.docker.option.ImageName;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,12 +53,6 @@ public class BuildImage
      * The {@link Configuration} for building the {@link Image}.
      */
     private final Configuration configuration;
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * Constructs a {@link BuildImage} {@link Command}.
@@ -97,17 +89,17 @@ public class BuildImage
 
         // establish the CompletingObserver observe when image ID has been generated
         // (we want to capture {"aux":{"ID":"sha256:f65c628a75fe8b3e982165d1a4ceaf521fadab8da2136702c59e184d7be3e243"})
-        final var completingSubscriber = new CompletingSubscriber<JsonNode>();
+        final var completingSubscriber = new CompletingSubscriber<JsonValue>();
         final var onImageBuilt = completingSubscriber.when(
-            json -> json.get("aux") != null,
-            json -> json.get("aux").get("ID").asText());
+            json -> json.asObject().has("aux"),
+            json -> json.get("aux").getString("ID"));
 
         final CompletableFuture<?> onSuccess = completingSubscriber.when(
-            json -> json.get("stream") != null,
-            json -> json.get("stream").asText().contains("Successful"));
+            json -> json.asObject().has("stream"),
+            json -> json.getString("stream").contains("Successful"));
 
         // process the entire InputStream from the Response to essentially wait for the image to be created
-        final JsonNodeInputStreamProcessor processor = new JsonNodeInputStreamProcessor(this.objectMapper);
+        final var processor = new JsonNodeInputStreamProcessor();
         processor.process(response.bodyStream(), completingSubscriber);
 
         // we've completed building when the ImageId is available and "Successful" has been observed

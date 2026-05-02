@@ -25,6 +25,7 @@ import build.base.flow.CompletingSubscriber;
 import build.base.flow.Publicist;
 import build.base.flow.Publisher;
 import build.base.flow.SubscriberRegistry;
+import build.base.json.JsonObject;
 import build.base.option.Email;
 import build.base.option.Password;
 import build.base.option.Username;
@@ -51,7 +52,6 @@ import build.spawn.docker.jdk.model.DockerImage;
 import build.spawn.docker.option.DockerAPIVersion;
 import build.spawn.docker.option.DockerRegistry;
 import build.spawn.docker.option.IdentityToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -142,9 +142,6 @@ public class AbstractSession
         this.eventSubscriber = new CompletingSubscriber<>();
         this.publicist.subscribe(this.eventSubscriber);
 
-        // establish an ObjectMapper for working with JSON
-        final ObjectMapper objectMapper = new ObjectMapper();
-
         // establish the dependency injection context
         this.context = injectionFramework
             .newContext();
@@ -155,7 +152,6 @@ public class AbstractSession
         this.context.bind(Session.class).to(this);
         this.context.bind(AbstractSession.class).to(this);
         this.context.bind((Class) getClass()).to(this);
-        this.context.bind(ObjectMapper.class).to(objectMapper);
         this.context.bind(Configuration.class).to(this.configuration);
         this.context.bind(Publicist.class).to(this.publicist);
         this.context.bind(Publisher.class).to(this.publicist);
@@ -178,23 +174,23 @@ public class AbstractSession
                 .to(identityToken);
 
             // establish the Authentication JSON
-            final var json = objectMapper.createObjectNode();
+            final var jsonBuilder = JsonObject.builder();
 
             if (identityToken.isEmpty()) {
                 this.configuration.getOptionalValue(Username.class)
-                    .ifPresent(username -> json.put("username", username));
+                    .ifPresent(username -> jsonBuilder.put("username", username));
                 this.configuration.getOptionalValue(Password.class)
-                    .ifPresent(password -> json.put("password", password));
+                    .ifPresent(password -> jsonBuilder.put("password", password));
                 this.configuration.getOptionalValue(Email.class)
-                    .ifPresent(email -> json.put("email", email));
+                    .ifPresent(email -> jsonBuilder.put("email", email));
                 this.configuration.getOptionalValue(DockerRegistry.class)
-                    .ifPresent(url -> json.put("serveraddress", url.getHost()));
+                    .ifPresent(url -> jsonBuilder.put("serveraddress", url.getHost()));
             }
             else {
-                json.put("identitytoken", identityToken.get());
+                jsonBuilder.put("identitytoken", identityToken.get());
             }
 
-            xRegistryAuth = Optional.of(json.toString());
+            xRegistryAuth = Optional.of(jsonBuilder.build().toJsonString());
         }
         else {
             // determine the Configuration-provided IdentityToken
@@ -211,9 +207,11 @@ public class AbstractSession
                 xRegistryAuth = Optional.empty();
             }
             else {
-                final var json = objectMapper.createObjectNode();
-                json.put("identitytoken", identityToken.get());
-                xRegistryAuth = Optional.of(json.toString());
+                xRegistryAuth = Optional.of(
+                    JsonObject.builder()
+                        .put("identitytoken", identityToken.get())
+                        .build()
+                        .toJsonString());
             }
         }
 

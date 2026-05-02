@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.model;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,29 +37,29 @@ public class ExecutionInformation
 
     @Override
     public String getContainerId() {
-        return jsonNode().get("ContainerId").asText();
+        return text("ContainerId");
     }
 
     @Override
     public String id() {
-        return jsonNode().get("ID").asText();
+        return text("ID");
     }
 
     @Override
     public OptionalLong pid() {
-        final var pid = jsonNode().get("Pid");
-
-        return pid == null || pid.isMissingNode() || pid.longValue() == 0
-            ? OptionalLong.empty()
-            : OptionalLong.of(pid.longValue());
+        final var pidNode = at("Pid");
+        if (pidNode == null) {
+            return OptionalLong.empty();
+        }
+        final long value = longAt(0L, "Pid");
+        return value == 0 ? OptionalLong.empty() : OptionalLong.of(value);
     }
 
     @Override
     public OptionalInt exitValue() {
-        final var exitValue = jsonNode().get("ExitCode");
-
-        return exitValue == null || exitValue.isMissingNode()
+        final var exitCodeNode = at("ExitCode");
+        return exitCodeNode == null
             ? OptionalInt.empty()
-            : OptionalInt.of(exitValue.intValue());
+            : OptionalInt.of(intAt(0, "ExitCode"));
     }
 }

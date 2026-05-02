@@ -20,7 +20,7 @@ package build.spawn.docker.jdk.event;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
+import build.base.json.JsonValue;
 
 /**
  * Represents an immutable {@code Docker Engine} Action Event.
@@ -37,7 +37,7 @@ public class ActionEvent
      * @return the type of the event
      */
     public String type() {
-        return jsonNode().get("Type").asText();
+        return jsonValue().getString("Type");
     }
 
     /**
@@ -46,15 +46,15 @@ public class ActionEvent
      * @return the action
      */
     public String action() {
-        return jsonNode().get("Action").asText();
+        return jsonValue().getString("Action");
     }
 
     /**
-     * Obtains the Actor {@link JsonNode}.
+     * Obtains the Actor {@link JsonValue}.
      *
-     * @return the Actor {@link JsonNode}
+     * @return the Actor {@link JsonValue}
      */
-    public JsonNode actor() {
-        return jsonNode().get("Actor");
+    public JsonValue actor() {
+        return jsonValue().get("Actor");
     }
 }

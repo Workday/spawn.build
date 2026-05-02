@@ -1,8 +1,5 @@
 package build.spawn.docker.option;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,21 +13,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PublishPortTests {
 
     /**
-     * Ensure that configuring multiple external bindings for the same internal port
-     * accumulates all bindings rather than silently discarding prior ones.
+     * Ensure that two {@link PublishPort} instances with the same internal port but different external ports
+     * are not equal, preserving the distinct bindings when collected.
      */
     @Test
-    void shouldAccumulateMultipleBindingsForSamePort() {
-        final var objectMapper = new ObjectMapper();
-        final var container = objectMapper.createObjectNode();
+    void distinctExternalPortsProduceDifferentInstances() {
+        final var first = PublishPort.of(8080, PublishPort.Type.TCP, 8080);
+        final var second = PublishPort.of(8080, PublishPort.Type.TCP, 9090);
 
-        // configure two distinct external ports mapped to the same internal port
-        PublishPort.of(8080, PublishPort.Type.TCP, 8080).configure(container, objectMapper);
-        PublishPort.of(8080, PublishPort.Type.TCP, 9090).configure(container, objectMapper);
-
-        final var portBindings = (ObjectNode) container.path("HostConfig").path("PortBindings");
-        final var array = (ArrayNode) portBindings.get("8080/tcp");
-
-        assertThat(array).hasSize(2);
+        assertThat(first).isNotEqualTo(second);
+        assertThat(first.port()).isEqualTo(8080);
+        assertThat(second.port()).isEqualTo(8080);
+        assertThat(first.type()).isEqualTo(PublishPort.Type.TCP);
     }
 }

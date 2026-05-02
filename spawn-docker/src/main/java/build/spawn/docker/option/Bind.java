@@ -9,9 +9,9 @@ package build.spawn.docker.option;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,9 +22,6 @@ package build.spawn.docker.option;
 
 import build.base.configuration.CollectedOption;
 import build.spawn.docker.Container;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -36,7 +33,7 @@ import java.util.Objects;
  * @author brian.oliver
  * @since Aug-2021
  */
-public class Bind
+public final class Bind
     implements DockerOption, CollectedOption<LinkedHashSet> {
 
     /**
@@ -53,37 +50,24 @@ public class Bind
      * Constructs a {@link Bind}.
      *
      * @param externalPath the external {@link Path}
-     * @param internalPath the external {@link Path}
+     * @param internalPath the internal {@link Path}
      */
     private Bind(final Path externalPath,
                  final Path internalPath) {
 
         Objects.requireNonNull(externalPath, "The external Path must not be null");
-        Objects.requireNonNull(externalPath, "The internal Path must not be null");
+        Objects.requireNonNull(internalPath, "The internal Path must not be null");
 
         this.externalPath = externalPath;
         this.internalPath = internalPath;
     }
 
-    @Override
-    public void configure(final ObjectNode objectNode, final ObjectMapper objectMapper) {
+    public Path externalPath() {
+        return this.externalPath;
+    }
 
-        // ensure the "HostConfig" exists an ObjectNode
-        final ObjectNode hostConfig = objectNode.get("HostConfig") == null
-            || !(objectNode.get("HostConfig") instanceof ObjectNode)
-            ? objectMapper.createObjectNode()
-            : (ObjectNode) objectNode.get("HostConfig");
-
-        // ensure the "Binds" exists as an ObjectNode
-        final ArrayNode binds = hostConfig.get("Binds") == null
-            || !(hostConfig.get("Binds") instanceof ArrayNode)
-            ? objectMapper.createArrayNode()
-            : (ArrayNode) hostConfig.get("Binds");
-
-        binds.add(this.externalPath.toString() + ":" + this.internalPath.toString());
-
-        hostConfig.set("Binds", binds);
-        objectNode.set("HostConfig", hostConfig);
+    public Path internalPath() {
+        return this.internalPath;
     }
 
     @Override
@@ -122,7 +106,7 @@ public class Bind
      * Create a {@link Bind} for a specified {@link Path}.
      *
      * @param externalPath the external {@link Path}
-     * @param internalPath the external {@link Path}
+     * @param internalPath the internal {@link Path}
      * @return a {@link Bind}
      */
     public static Bind of(final Path externalPath, final Path internalPath) {
