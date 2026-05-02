@@ -406,7 +406,7 @@ class SessionTests {
                 .get(RABBITMQ_IMAGE)
                 .orElseThrow(() -> new AssertionError("Failed to get the required image"));
 
-            try (var container = image.start()) {
+            try (var container = image.start(PublishAllPorts.ENABLED)) {
 
                 Eventually.assertThat(container.onStart())
                     .isCompleted();

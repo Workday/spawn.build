@@ -22,12 +22,12 @@ package build.spawn.docker.jdk.command;
 
 import build.base.flow.Publicist;
 import build.base.flow.Subscriber;
+import build.base.json.JsonFormat;
+import build.base.json.JsonValue;
 import build.base.naming.UniqueNameGenerator;
 import build.spawn.docker.Event;
 import build.spawn.docker.jdk.HttpTransport;
 import build.spawn.docker.jdk.event.ActionEvent;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
@@ -41,12 +41,6 @@ import java.io.IOException;
  */
 public class GetSystemEvents
     extends AbstractNonBlockingCommand<Void> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The {@link Publicist} for {@code Docker Engine} {@link Event}s.
@@ -69,17 +63,17 @@ public class GetSystemEvents
         // create a Thread to commence reading the event stream from the response
         final Runnable runnable = () -> {
             // establish the Json-based Subscriber for System Events
-            final var jsonSubscriber = new Subscriber<JsonNode>() {
+            final var jsonSubscriber = new Subscriber<JsonValue>() {
                 @Override
-                public void onNext(final JsonNode item) {
+                public void onNext(final JsonValue item) {
                     // establish a Context to use for creating Events
                     final var context = createContext();
-                    context.bind(JsonNode.class).to(item);
+                    context.bind(JsonValue.class).to(item);
 
-                    System.out.println("Raw Event: [" + name + "] " + item.toPrettyString());
+                    System.out.println("Raw Event: [" + name + "] " + item.toJsonString(JsonFormat.PRETTY));
 
                     // publish "Action" events as ActionEvents
-                    if (item.get("Action") != null) {
+                    if (item.asObject().has("Action")) {
                         final var event = context.create(ActionEvent.class);
                         GetSystemEvents.this.publisher.publish(event);
                     }
@@ -97,7 +91,7 @@ public class GetSystemEvents
             };
 
             // process the entire InputStream from the Response to essentially wait for the image to be created
-            final var processor = new JsonNodeInputStreamProcessor(this.objectMapper);
+            final var processor = new JsonNodeInputStreamProcessor();
             try {
                 processor.process(response.bodyStream(), jsonSubscriber);
             } catch (final IOException e) {

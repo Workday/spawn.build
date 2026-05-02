@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,6 @@ import build.spawn.docker.jdk.Authenticator;
 import build.spawn.docker.jdk.HttpTransport;
 import build.spawn.docker.jdk.event.ActionEvent;
 import build.spawn.docker.option.ImageName;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 
 import java.nio.charset.StandardCharsets;
@@ -44,12 +43,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class PullImage
     extends AbstractEventBasedBlockingCommand<Optional<String>> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The {@link Authenticator} for the {@link Request}.
@@ -107,6 +100,6 @@ public class PullImage
         return this.eventSubscriber.when(event ->
             event instanceof ActionEvent actionEvent
                 && actionEvent.action().equals("pull")
-                && actionEvent.jsonNode().get("id").asText().equals(this.nameOrId));
+                && actionEvent.jsonValue().getString("id").equals(this.nameOrId));
     }
 }

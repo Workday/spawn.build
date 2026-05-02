@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,11 @@ package build.spawn.docker.jdk.command;
  * #L%
  */
 
+import build.base.json.Json;
+import build.base.json.JsonValue;
 import build.spawn.docker.Execution;
 import build.spawn.docker.jdk.HttpTransport;
 import build.spawn.docker.jdk.model.ExecutionInformation;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -40,12 +39,6 @@ import java.util.Optional;
  */
 public class InspectExecution
     extends AbstractBlockingCommand<Optional<Execution.Information>> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The id of the {@link Execution} to inspect
@@ -86,9 +79,8 @@ public class InspectExecution
         // establish a new Context to create the Result
         final var context = createContext();
 
-        // bind the JsonNode representation of the response
-        final var json = response.bodyString();
-        context.bind(JsonNode.class).to(this.objectMapper.readTree(json));
+        // bind the JsonValue representation of the response
+        context.bind(JsonValue.class).to(Json.parse(response.bodyString()));
 
         return Optional.of(context.create(ExecutionInformation.class));
     }

@@ -32,8 +32,6 @@ module build.spawn.docker {
 
     requires transitive build.codemodel.injection;
 
-    requires com.fasterxml.jackson.databind;
-
     exports build.spawn.docker;
     exports build.spawn.docker.option;
 

@@ -22,8 +22,6 @@ package build.spawn.docker.option;
 
 import build.base.configuration.CollectedOption;
 import build.base.foundation.Strings;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -97,21 +95,6 @@ public final class ExposedPort
     @Override
     public String toString() {
         return "ExposedPort{" + this.port + '/' + this.type.toString().toLowerCase() + '}';
-    }
-
-    @Override
-    public void configure(final ObjectNode objectNode, final ObjectMapper objectMapper) {
-
-        // ensure the "ExposedPorts" exists as an ArrayNode
-        final ObjectNode exposedPorts = objectNode.get("ExposedPorts") == null
-            || !(objectNode.get("ExposedPorts") instanceof ObjectNode)
-            ? objectMapper.createObjectNode()
-            : (ObjectNode) objectNode.get("ExposedPorts");
-
-        // add the ExposedPort
-        exposedPorts.set(this.port + "/" + this.type.toString().toLowerCase(), objectMapper.createObjectNode());
-
-        objectNode.set("ExposedPorts", exposedPorts);
     }
 
     /**

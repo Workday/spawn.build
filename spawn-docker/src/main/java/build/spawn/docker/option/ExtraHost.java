@@ -22,9 +22,6 @@ package build.spawn.docker.option;
 
 import build.base.configuration.AbstractValueOption;
 import build.base.configuration.CollectedOption;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.LinkedHashSet;
 
@@ -35,7 +32,7 @@ import java.util.LinkedHashSet;
  * @author brian.oliver
  * @since Aug-2021
  */
-public class ExtraHost
+public final class ExtraHost
     extends AbstractValueOption<String>
     implements DockerOption, CollectedOption<LinkedHashSet> {
 
@@ -58,24 +55,4 @@ public class ExtraHost
         return new ExtraHost(host);
     }
 
-    @Override
-    public void configure(final ObjectNode objectNode, final ObjectMapper objectMapper) {
-
-        // ensure the "/HostConfig" exists
-        final ObjectNode hostConfig = objectNode.get("HostConfig") == null
-            ? objectMapper.createObjectNode()
-            : (ObjectNode) objectNode.get("HostConfig");
-
-        objectNode.set("HostConfig", hostConfig);
-
-        // ensure "/HostConfig/ExtraHosts" exists
-        final ArrayNode extraHosts = hostConfig.get("ExtraHosts") == null
-            ? objectMapper.createArrayNode()
-            : (ArrayNode) hostConfig.get("ExtraHosts");
-
-        hostConfig.set("ExtraHosts", extraHosts);
-
-        // add this ExtraHost
-        extraHosts.add(get());
-    }
 }

@@ -68,10 +68,9 @@
 
         <!-- Module Dependency Versions -->
         <assertj.version>3.27.7</assertj.version>
-        <base.version>0.23.1</base.version>
+        <base.version>0.24.0</base.version>
         <byte-buddy.version>1.18.4</byte-buddy.version>
-        <codemodel.version>0.21.1</codemodel.version>
-        <jackson-core.version>2.21.2</jackson-core.version>
+        <codemodel.version>0.21.2</codemodel.version>
         <junit.version>6.0.3</junit.version>
         <jakarta-inject.version>2.0.1</jakarta-inject.version>
         <mockito.version>5.23.0</mockito.version>
@@ -236,21 +235,18 @@
                 <version>${codemodel.version}</version>
             </dependency>
 
+            <!-- Upstream: base.build (extra) -->
+            <dependency>
+                <groupId>build.base</groupId>
+                <artifactId>base-json</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+
             <!-- Third-party -->
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
                 <version>${byte-buddy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.inject</groupId>

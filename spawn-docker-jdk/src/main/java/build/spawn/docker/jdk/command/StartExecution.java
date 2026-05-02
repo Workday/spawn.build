@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,11 +23,10 @@ package build.spawn.docker.jdk.command;
 import build.base.configuration.Configuration;
 import build.base.io.NullWriter;
 import build.base.io.Terminal;
+import build.base.json.JsonObject;
 import build.spawn.docker.Container;
 import build.spawn.docker.Execution;
 import build.spawn.docker.jdk.HttpTransport;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.io.PipedReader;
@@ -47,12 +46,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class StartExecution
     extends AbstractNonBlockingCommand<Execution> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The {@link Container} to start.
@@ -90,7 +83,6 @@ public class StartExecution
         this.container = Objects.requireNonNull(container, "The Container must not be null");
         this.id = Objects.requireNonNull(id, "The identity of the Execution must not be null");
         this.configuration = Objects.requireNonNull(configuration, "The OptionsByType must not be null");
-
         this.terminalRequired = terminalRequired;
     }
 
@@ -98,12 +90,13 @@ public class StartExecution
     protected HttpTransport.Request createRequest() {
 
         // establish an ObjectNode containing the containers/create json
-        final var node = this.objectMapper.createObjectNode();
-        node.put("Detach", !this.terminalRequired);
-        node.put("Tty", false);
+        final var node = JsonObject.builder()
+            .put("Detach", !this.terminalRequired)
+            .put("Tty", false)
+            .build();
 
         return HttpTransport.Request
-            .post("/exec/" + this.id + "/start", node.toString().getBytes(StandardCharsets.UTF_8))
+            .post("/exec/" + this.id + "/start", node.toJsonString().getBytes(StandardCharsets.UTF_8))
             .withContentType("application/json");
     }
 

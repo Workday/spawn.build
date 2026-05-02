@@ -9,9 +9,9 @@ package build.spawn.docker.option;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,8 @@ package build.spawn.docker.option;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,13 +32,13 @@ import java.util.stream.Stream;
  * @author brian.oliver
  * @since Jun-2021
  */
-public class Command
+public final class Command
     implements DockerOption {
 
     /**
      * The values for the {@link Command}.
      */
-    private final ArrayList<String> values;
+    private final List<String> values;
 
     /**
      * Constructs a {@link Command}.
@@ -50,18 +47,17 @@ public class Command
      */
     private Command(final Stream<String> values) {
         this.values = values == null
-            ? new ArrayList<>()
-            : values.collect(Collectors.toCollection(ArrayList::new));
+            ? List.of()
+            : values.collect(Collectors.toUnmodifiableList());
     }
 
-    @Override
-    public void configure(final ObjectNode objectNode, final ObjectMapper objectMapper) {
-
-        // establish the "Cmd" for the Container
-        final var arrayNode = objectNode.arrayNode();
-        this.values.forEach(arrayNode::add);
-
-        objectNode.set("Cmd", arrayNode);
+    /**
+     * Obtains the command values.
+     *
+     * @return the command values
+     */
+    public List<String> values() {
+        return this.values;
     }
 
     /**

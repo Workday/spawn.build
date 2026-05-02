@@ -9,9 +9,9 @@ package build.spawn.docker.jdk.command;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,8 @@ package build.spawn.docker.jdk.command;
 
 import build.base.configuration.Configuration;
 import build.base.foundation.Strings;
+import build.base.json.Json;
+import build.base.json.JsonObject;
 import build.base.option.Email;
 import build.base.option.Password;
 import build.base.option.Username;
@@ -29,7 +31,6 @@ import build.spawn.docker.Session;
 import build.spawn.docker.jdk.HttpTransport;
 import build.spawn.docker.option.DockerRegistry;
 import build.spawn.docker.option.IdentityToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
@@ -44,12 +45,6 @@ import java.nio.charset.StandardCharsets;
  */
 public class Authenticate
     extends AbstractBlockingCommand<IdentityToken> {
-
-    /**
-     * The {@link ObjectMapper} for parsing json.
-     */
-    @Inject
-    private ObjectMapper objectMapper;
 
     /**
      * The {@link Username} for authentication.
@@ -79,16 +74,16 @@ public class Authenticate
     protected HttpTransport.Request createRequest() {
 
         // establish an ObjectNode containing the auth json
-        final var node = this.objectMapper.createObjectNode();
+        final var builder = JsonObject.builder()
+            .put("username", this.username.get())
+            .put("password", this.password.get())
+            .put("serveraddress", this.dockerRegistry.get().toString());
 
-        node.put("username", this.username.get());
-        node.put("password", this.password.get());
         this.configuration.getOptionalValue(Email.class)
-            .ifPresent(email -> node.put("email", email));
-        node.put("serveraddress", this.dockerRegistry.get().toString());
+            .ifPresent(email -> builder.put("email", email));
 
         return HttpTransport.Request
-            .post("/auth", node.toString().getBytes(StandardCharsets.UTF_8))
+            .post("/auth", builder.build().toJsonString().getBytes(StandardCharsets.UTF_8))
             .withContentType("application/json");
     }
 
@@ -96,10 +91,10 @@ public class Authenticate
     protected IdentityToken createResult(final HttpTransport.Response response)
         throws IOException {
 
-        final var body = response.bodyString();
-        final var json = this.objectMapper.readTree(body);
-
-        final var identityToken = json.get("IdentityToken").asText();
+        final var json = Json.parse(response.bodyString()).asObject();
+        final var identityToken = json.has("IdentityToken")
+            ? json.getString("IdentityToken")
+            : "";
 
         return Strings.isEmpty(identityToken)
             ? IdentityToken.of(this.password.get())
