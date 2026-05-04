@@ -4,7 +4,7 @@
 
 Spawn is a Java 25 framework for programmatically launching and controlling processes, JVMs, and Docker containers. It provides a unified abstraction (`Platform` / `Application` / `Process`) over different execution environments. The core pattern: define a `Specification`, call `platform.launch(spec)`, get back an `Application` with `CompletableFuture`-based lifecycle hooks.
 
-**Stack**: Java 25, Maven, Jackson, `build.base.*` and `build.codemodel.injection`
+**Stack**: Java 25, Maven, `build.base.*` (incl. `build.base.json`) and `build.codemodel.injection`
 
 **Structure**: 8 Maven modules in a monorepo, each mapping to a JPMS module:
 - `spawn-option` → shared option types
@@ -31,5 +31,5 @@ Tests requiring Docker are gated by `@EnabledIf("isDockerAvailable")`. The `spaw
 
 - All option types are immutable with static `of(...)` factories and `@Default` annotated defaults
 - `Customizer` inner classes on `Application` interfaces are auto-discovered and applied at launch
-- Launcher registry: `META-INF/<PlatformClassName>` properties files map `Application=Launcher`
+- Launcher registry: JPMS `ServiceLoader<LauncherRegistration>` — modules declare `provides LauncherRegistration with ...` in `module-info.java`
 - Checkstyle enforced: no tabs, no star imports, final locals, no asserts, braces required
