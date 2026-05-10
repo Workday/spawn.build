@@ -118,8 +118,10 @@ public class ContainerInformation
         final List<Link> linkList = new ArrayList<>();
         for (final JsonValue entry : linksArray.values()) {
             final String text = entry instanceof JsonString s ? s.value() : entry.toJsonString();
-            final String[] split = text.split(":");
-            linkList.add(Link.of(split[0], split[1]));
+            final String[] split = text.split(":", 2);
+            if (split.length == 2) {
+                linkList.add(Link.of(split[0], split[1]));
+            }
         }
 
         return linkList.stream();
