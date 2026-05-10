@@ -34,7 +34,7 @@ public class NetworkInformation
 
     @Override
     public String driver() {
-        return text("driver");
+        return text("Driver");
     }
 
     @Override

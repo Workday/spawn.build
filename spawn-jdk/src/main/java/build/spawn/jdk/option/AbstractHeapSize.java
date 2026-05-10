@@ -77,7 +77,14 @@ public abstract class AbstractHeapSize
 
     @Override
     public Stream<String> resolve(final Platform platform, final ConfigurationBuilder options) {
-        return Stream.of(getOption() + this.units + this.memorySize.name().toLowerCase().substring(0, 1));
+        final String suffix = switch (this.memorySize) {
+            case B -> "";
+            case KiB, KB -> "k";
+            case MiB, MB -> "m";
+            case GiB, GB -> "g";
+            default -> throw new IllegalArgumentException("Unsupported memory size for heap: " + this.memorySize);
+        };
+        return Stream.of(getOption() + this.units + suffix);
     }
 
     @Override

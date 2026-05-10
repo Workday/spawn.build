@@ -132,8 +132,6 @@ public class DockerContainer
         // obtain the identity for the Container from the JsonValue
         this.id = jsonValue().getString("Id");
 
-        System.out.println("Created Container: " + this.id.substring(this.id.length() - 8));
-
         // establish a CompletingSubscriber for the Container
         this.completingSubscriber = new CompletingSubscriber<>();
 
@@ -147,10 +145,7 @@ public class DockerContainer
         // establish the CompletableFuture to identify when the Container has started
         this.onStart = this.completingSubscriber.when(
             event -> "start".equals(event.action()),
-            __ -> {
-                System.out.println("Started Container: " + this.id.substring(this.id.length() - 8));
-                return this;
-            });
+            __ -> this);
 
         // establish the CompletableFuture to identify when the Container has terminated (died)
         this.onExit = this.completingSubscriber.when(event -> {
@@ -170,10 +165,7 @@ public class DockerContainer
 
                 return false;
             },
-            _ -> {
-                System.out.println("Exited Container: " + this.id.substring(this.id.length() - 8));
-                return this;
-            });
+            _ -> this);
 
         this.exitValue = null;
     }

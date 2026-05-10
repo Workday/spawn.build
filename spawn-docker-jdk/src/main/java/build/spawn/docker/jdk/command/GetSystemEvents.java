@@ -22,7 +22,6 @@ package build.spawn.docker.jdk.command;
 
 import build.base.flow.Publicist;
 import build.base.flow.Subscriber;
-import build.base.json.JsonFormat;
 import build.base.json.JsonValue;
 import build.base.naming.UniqueNameGenerator;
 import build.spawn.docker.Event;
@@ -69,8 +68,6 @@ public class GetSystemEvents
                     // establish a Context to use for creating Events
                     final var context = createContext();
                     context.bind(JsonValue.class).to(item);
-
-                    System.out.println("Raw Event: [" + name + "] " + item.toJsonString(JsonFormat.PRETTY));
 
                     // publish "Action" events as ActionEvents
                     if (item.asObject().has("Action")) {

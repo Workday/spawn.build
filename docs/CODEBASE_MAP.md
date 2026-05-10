@@ -237,10 +237,6 @@ Server (listens on spawn:// URI)
   ApplicationSubscriber receives ◄─── EmbeddedServer.createProducer().publish(item)
 ```
 
-**Known bugs in `spawn-jdk`:**
-- `PatchModule.detect()` has a split-on-`=` bug for `--patch-module=module=path` args (no limit — third segment dropped).
-- `AbstractHeapSize`: memory unit suffix derived from first letter of enum name — adding a misnamed `MemorySize` enum would produce wrong JVM flag silently.
-
 ---
 
 ### `spawn-local-platform`
@@ -322,15 +318,12 @@ Server (listens on spawn:// URI)
 | `ImageName` | (image reference) | Handles tags, SHA256 refs, registry prefixing |
 | `ExposedPort` | `ExposedPorts` | Metadata only; use `PublishPort` for host mapping |
 | `PublishPort` | `HostConfig.PortBindings` | |
-| `Bind` | `HostConfig.Binds` | **Bug:** `requireNonNull` checks wrong param name |
+| `Bind` | `HostConfig.Binds` | |
 | `Command` | `Cmd` | Sets container CMD array |
 | `ContainerName` | `?name=` query param | 409 if duplicate |
 | `NetworkName` | `HostConfig.NetworkMode` | |
 | `PublishAllPorts` | `HostConfig.PublishAllPorts` | `@Default ENABLED` |
 | `KillSignal` | `signal` query param | Enum: `SIGKILL` (`@Default`), `SIGTERM`, `SIGQUIT`, `SIGHUP` |
-
-**Known bugs in `spawn-docker`:**
-- `Bind`: `requireNonNull` for `internalPath` references `externalPath` param name (copy-paste; runtime behavior correct)
 
 ---
 
@@ -363,11 +356,6 @@ Server (listens on spawn:// URI)
 | `model/DockerImage.java` | `Image` impl; `start()` creates then starts container; auto-removes on start failure |
 | `model/AbstractJsonBasedResult.java` | DI-injected `Session` + `JsonValue` (base-json); `at(keys)` / `text(keys)` / `intAt` / `boolAt` navigation helpers |
 
-**Known bugs:**
-- `GetSystemEvents` and `DockerContainer` have debug `System.out.println` calls in production code
-- `CopyFiles` constructor validation inverts the check (throws when file has content instead of when it's empty)
-- `NetworkInformation.driver()` reads lowercase `"driver"` but Docker API returns `"Driver"` → always returns empty string
-- `ContainerInformation.links()`: splits on `:` — `ArrayIndexOutOfBoundsException` if link string has no colon
 
 ## Conventions
 

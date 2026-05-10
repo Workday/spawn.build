@@ -186,7 +186,7 @@ public class LocalJDKLauncher
         // --- launch the Java Application ---
         this.diagnostics.addRow("Application Launch Command", String.join(" ", processBuilder.command()));
 
-        LOGGER.info("\n" + "build.spawn: Launching JDK-based Application...\n"
+        LOGGER.debug("\n" + "build.spawn: Launching JDK-based Application...\n"
             + "--------------------------------------------------------------\n" + "{0}"
             + "--------------------------------------------------------------", this.diagnostics);
 

@@ -155,7 +155,7 @@ public class PatchModule
             .stream()
             .filter(argument -> argument.startsWith("--patch-module="))
             .map(argument -> argument.substring("--patch-module=".length()))
-            .map(argument -> argument.split("="))
+            .map(argument -> argument.split("=", 2))
             .map(array -> PatchModule.of(array[0], array[1]));
     }
 }
