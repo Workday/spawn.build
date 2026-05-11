@@ -30,7 +30,10 @@ import build.spawn.application.Application;
 import build.spawn.application.Platform;
 import build.spawn.application.option.ApplicationSubscriber;
 import build.spawn.application.option.LaunchIdentity;
+import build.spawn.jdk.option.AddExports;
 import build.spawn.jdk.option.AddModules;
+import build.spawn.jdk.option.AddOpens;
+import build.spawn.jdk.option.AddReads;
 import build.spawn.jdk.option.ClassPath;
 import build.spawn.jdk.option.Headless;
 import build.spawn.jdk.option.Jar;
@@ -111,6 +114,15 @@ public interface JDKApplication
                         .ifPresent(addModules -> options.addIfNotPresent(AddModules.class, addModules));
 
                     PatchModule.detect()
+                        .forEach(options::add);
+
+                    AddExports.detect()
+                        .forEach(options::add);
+
+                    AddOpens.detect()
+                        .forEach(options::add);
+
+                    AddReads.detect()
                         .forEach(options::add);
                 }
             }

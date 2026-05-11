@@ -46,6 +46,11 @@ public class ModuleName {
     public static final ModuleName ALL_MODULE_PATH = new ModuleName("ALL-MODULE-PATH");
 
     /**
+     * The {@code ALL-UNNAMED} {@link ModuleName}.
+     */
+    public static final ModuleName ALL_UNNAMED = new ModuleName("ALL-UNNAMED");
+
+    /**
      * The module name.
      */
     private final String moduleName;
