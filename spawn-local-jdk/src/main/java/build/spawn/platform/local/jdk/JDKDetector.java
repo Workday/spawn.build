@@ -23,7 +23,9 @@ package build.spawn.platform.local.jdk;
 import build.base.foundation.Exceptional;
 import build.base.logging.Logger;
 import build.base.option.JDKVersion;
+import build.spawn.jdk.Architecture;
 import build.spawn.jdk.JDK;
+import build.spawn.jdk.OperatingSystem;
 import build.spawn.jdk.option.JDKHome;
 
 import java.io.IOException;
@@ -63,6 +65,19 @@ public interface JDKDetector {
      * @return a {@link Stream} of {@link JDK}s
      */
     Stream<JDK> detect();
+
+    /**
+     * Obtains a {@link Stream} of the available {@link JDK}s built for the specified {@link OperatingSystem}
+     * and {@link Architecture}, e.g. to locate a foreign {@link JDK} staged for cross-target {@code jlink}ing.
+     *
+     * @param operatingSystem the required {@link OperatingSystem}
+     * @param architecture    the required {@link Architecture}
+     * @return a {@link Stream} of matching {@link JDK}s
+     */
+    default Stream<JDK> detect(final OperatingSystem operatingSystem, final Architecture architecture) {
+        return detect()
+            .filter(jdk -> jdk.operatingSystem() == operatingSystem && jdk.architecture() == architecture);
+    }
 
     /**
      * Obtains a {@link Stream} of the {@link JDKDetector}s that are available.
@@ -131,8 +146,10 @@ public interface JDKDetector {
             return Exceptional.empty();
         }
 
-        // a Pattern to match JAVA_VERSION="..." in the release file
+        // patterns to match JAVA_VERSION="...", OS_NAME="..." and OS_ARCH="..." in the release file
         final var VERSION = Pattern.compile("JAVA_VERSION=\"(.+?)\"");
+        final var OS_NAME = Pattern.compile("OS_NAME=\"(.+?)\"");
+        final var OS_ARCH = Pattern.compile("OS_ARCH=\"(.+?)\"");
 
         try {
             final var releaseContent = Files.readString(releaseFile);
@@ -142,7 +159,19 @@ public interface JDKDetector {
                 final var javaVersion = JDKVersion.of(matcher.group(1));
                 final var javaHome = JDKHome.of(home.toString());
 
-                return Exceptional.of(JDK.of(javaVersion, javaHome));
+                // OS_NAME / OS_ARCH describe the platform the JDK was built for, which may differ
+                // from the host running this detection (e.g. a foreign JDK staged for cross-jlinking)
+                final var osNameMatcher = OS_NAME.matcher(releaseContent);
+                final var operatingSystem = osNameMatcher.find()
+                    ? OperatingSystem.of(osNameMatcher.group(1))
+                    : OperatingSystem.current();
+
+                final var osArchMatcher = OS_ARCH.matcher(releaseContent);
+                final var architecture = osArchMatcher.find()
+                    ? Architecture.of(osArchMatcher.group(1))
+                    : Architecture.current();
+
+                return Exceptional.of(JDK.of(javaVersion, javaHome, operatingSystem, architecture));
             }
             else {
                 LOGGER.warn("Could not detect Java version from release file at [{0}]", releaseFile);
