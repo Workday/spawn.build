@@ -34,6 +34,7 @@ import build.spawn.application.option.Name;
 import build.spawn.application.option.Orphanable;
 import build.spawn.jdk.AbstractTemplatedJDKLauncher;
 import build.spawn.jdk.JDKApplication;
+import build.spawn.jdk.OperatingSystem;
 import build.spawn.jdk.agent.SpawnAgent;
 import build.spawn.jdk.agent.SpawnAgentArchiveBuilder;
 import build.spawn.jdk.option.JDKAgent;
@@ -74,7 +75,11 @@ public class LocalJDKLauncher
 
     @Override
     public Optional<Executable> getExecutable(final ConfigurationBuilder options) {
-        return Optional.of(Executable.of(options.get(JDKHome.class).get() + "/bin/java"));
+        // the JDK is launched on this LocalMachine, so the host's own OperatingSystem determines
+        // whether the java executable carries a .exe suffix
+        final var javaExecutable = OperatingSystem.current() == OperatingSystem.WINDOWS ? "bin/java.exe" : "bin/java";
+
+        return Optional.of(Executable.of(options.get(JDKHome.class).get() + "/" + javaExecutable));
     }
 
     @Override

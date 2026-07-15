@@ -63,6 +63,30 @@ class JDKDetectorForeignPlatformTests {
     }
 
     /**
+     * Ensure a staged Windows JDK — which only ships {@code bin/java.exe}, not {@code bin/java} — is
+     * still recognized as a valid Java Home rather than rejected outright.
+     */
+    @Test
+    void shouldDetectWindowsJDKWithOnlyJavaExe(@TempDir final Path tempDir) throws IOException {
+        final var bin = tempDir.resolve("bin");
+        Files.createDirectories(bin);
+        Files.createFile(bin.resolve("java.exe"));
+        Files.writeString(tempDir.resolve("release"), """
+            JAVA_VERSION="21.0.1"
+            OS_NAME="Windows Server 2022"
+            OS_ARCH="x86_64"
+            """);
+
+        final Exceptional<JDK> result = JDKDetector.of(tempDir);
+
+        assertThat(result.isPresent()).isTrue();
+
+        final var jdk = result.orElseThrow();
+        assertThat(jdk.operatingSystem()).isEqualTo(OperatingSystem.WINDOWS);
+        assertThat(jdk.architecture()).isEqualTo(Architecture.X86_64);
+    }
+
+    /**
      * Stages a minimal, fake JDK home: a {@code bin/java} placeholder (so {@link JDKDetector#of(Path)}
      * accepts it as a JDK home) and the specified {@code release} file content.
      */
