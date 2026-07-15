@@ -134,8 +134,8 @@ public interface JDKDetector {
             home = home.getParent();
         }
 
-        if (!home.resolve("bin/java").toFile().exists()) {
-            LOGGER.warn("The JDK Home [{0}] does not contain bin/java", home);
+        if (!home.resolve("bin/java").toFile().exists() && !home.resolve("bin/java.exe").toFile().exists()) {
+            LOGGER.warn("The JDK Home [{0}] does not contain bin/java or bin/java.exe", home);
             return Exceptional.empty();
         }
 
