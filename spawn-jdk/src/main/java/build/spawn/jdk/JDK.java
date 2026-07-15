@@ -45,14 +45,29 @@ public final class JDK
     private final JDKHome home;
 
     /**
+     * The {@link OperatingSystem} the {@link JDK} was built for.
+     */
+    private final OperatingSystem operatingSystem;
+
+    /**
+     * The {@link Architecture} the {@link JDK} was built for.
+     */
+    private final Architecture architecture;
+
+    /**
      * Constructs a {@link JDK}.
      *
-     * @param version the {@link JDKVersion}
-     * @param home    the {@link JDKHome}
+     * @param version         the {@link JDKVersion}
+     * @param home            the {@link JDKHome}
+     * @param operatingSystem the {@link OperatingSystem} the {@link JDK} was built for
+     * @param architecture    the {@link Architecture} the {@link JDK} was built for
      */
-    private JDK(final JDKVersion version, final JDKHome home) {
+    private JDK(final JDKVersion version, final JDKHome home, final OperatingSystem operatingSystem,
+                final Architecture architecture) {
         this.version = Objects.requireNonNull(version, "The JDKVersion must not be null");
         this.home = Objects.requireNonNull(home, "The JDKHome must not be null");
+        this.operatingSystem = Objects.requireNonNull(operatingSystem, "The OperatingSystem must not be null");
+        this.architecture = Objects.requireNonNull(architecture, "The Architecture must not be null");
     }
 
     /**
@@ -73,9 +88,28 @@ public final class JDK
         return this.home;
     }
 
+    /**
+     * Obtains the {@link OperatingSystem} the {@link JDK} was built for.
+     *
+     * @return the {@link OperatingSystem}
+     */
+    public OperatingSystem operatingSystem() {
+        return this.operatingSystem;
+    }
+
+    /**
+     * Obtains the {@link Architecture} the {@link JDK} was built for.
+     *
+     * @return the {@link Architecture}
+     */
+    public Architecture architecture() {
+        return this.architecture;
+    }
+
     @Override
     public String toString() {
-        return "JDK{version=" + this.version + ", home=" + this.home.path() + "}";
+        return "JDK{version=" + this.version + ", home=" + this.home.path()
+            + ", os=" + this.operatingSystem + ", arch=" + this.architecture + "}";
     }
 
     @Override
@@ -91,12 +125,13 @@ public final class JDK
         if (!(object instanceof final JDK other)) {
             return false;
         }
-        return Objects.equals(this.version, other.version) && Objects.equals(this.home, other.home);
+        return Objects.equals(this.version, other.version) && Objects.equals(this.home, other.home)
+            && this.operatingSystem == other.operatingSystem && this.architecture == other.architecture;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.version, this.home);
+        return Objects.hash(this.version, this.home, this.operatingSystem, this.architecture);
     }
 
     /**
@@ -109,17 +144,33 @@ public final class JDK
      * @return the current {@link JDK}
      */
     public static JDK current() {
-        return of(JDKVersion.current(), JDKHome.current());
+        return of(JDKVersion.current(), JDKHome.current(), OperatingSystem.current(), Architecture.current());
     }
 
     /**
-     * Creates a {@link JDK} based on the specified {@link JDKVersion} and {@link JDKHome}.
+     * Creates a {@link JDK} based on the specified {@link JDKVersion} and {@link JDKHome}, assuming it was
+     * built for the {@link OperatingSystem} and {@link Architecture} of the currently executing Virtual Machine.
      *
      * @param version the {@link JDKVersion}
      * @param home    the {@link JDKHome}
      * @return a new {@link JDK}
      */
     public static JDK of(final JDKVersion version, final JDKHome home) {
-        return new JDK(version, home);
+        return of(version, home, OperatingSystem.current(), Architecture.current());
+    }
+
+    /**
+     * Creates a {@link JDK} based on the specified {@link JDKVersion}, {@link JDKHome}, {@link OperatingSystem}
+     * and {@link Architecture}.
+     *
+     * @param version         the {@link JDKVersion}
+     * @param home            the {@link JDKHome}
+     * @param operatingSystem the {@link OperatingSystem} the {@link JDK} was built for
+     * @param architecture    the {@link Architecture} the {@link JDK} was built for
+     * @return a new {@link JDK}
+     */
+    public static JDK of(final JDKVersion version, final JDKHome home, final OperatingSystem operatingSystem,
+                          final Architecture architecture) {
+        return new JDK(version, home, operatingSystem, architecture);
     }
 }
