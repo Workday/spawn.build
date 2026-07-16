@@ -23,6 +23,7 @@ package build.spawn.jdk;
 import build.base.option.JDKVersion;
 import build.spawn.jdk.option.JDKHome;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -112,9 +113,23 @@ public final class JDK
             + ", os=" + this.operatingSystem + ", arch=" + this.architecture + "}";
     }
 
+    /**
+     * Orders {@link JDK}s by {@link JDKVersion}, then {@link OperatingSystem}, {@link Architecture} and
+     * {@link JDKHome} as tie-breakers.
+     * <p>
+     * Version alone is not consistent with {@link #equals(Object)} (which also considers platform and
+     * home) — without the tie-breakers, two {@link JDK}s of the same version but different target
+     * platforms would compare as equal and collide when stored in a {@code SortedSet}/{@code TreeMap},
+     * silently dropping one of them.
+     */
+    private static final Comparator<JDK> ORDER = Comparator.comparing(JDK::version)
+        .thenComparing(JDK::operatingSystem)
+        .thenComparing(JDK::architecture)
+        .thenComparing(jdk -> jdk.home().path());
+
     @Override
     public int compareTo(final JDK other) {
-        return version().compareTo(other.version());
+        return ORDER.compare(this, other);
     }
 
     @Override
