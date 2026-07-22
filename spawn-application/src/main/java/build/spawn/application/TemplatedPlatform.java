@@ -21,8 +21,8 @@ package build.spawn.application;
  */
 
 import build.base.configuration.Configuration;
-import build.codemodel.injection.Context;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.Context;
+import build.codemodel.dependency.injection.InjectionFramework;
 import build.codemodel.jdk.JDKCodeModel;
 
 /**

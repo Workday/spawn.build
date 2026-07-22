@@ -21,7 +21,7 @@ package build.spawn.docker.jdk;
  */
 
 import build.base.configuration.Configuration;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.InjectionFramework;
 
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;

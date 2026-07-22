@@ -29,9 +29,9 @@ import build.base.json.JsonObject;
 import build.base.option.Email;
 import build.base.option.Password;
 import build.base.option.Username;
-import build.codemodel.injection.ConfigurationResolver;
-import build.codemodel.injection.Context;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.ConfigurationResolver;
+import build.codemodel.dependency.injection.Context;
+import build.codemodel.dependency.injection.InjectionFramework;
 import build.spawn.docker.Event;
 import build.spawn.docker.Image;
 import build.spawn.docker.Images;
@@ -112,7 +112,7 @@ public class AbstractSession
     /**
      * Constructs an {@link AbstractSession} using the specified {@link HttpTransport} and {@link Configuration}.
      *
-     * @param injectionFramework the {@link InjectionFramework} to use for {@link build.codemodel.injection.Dependency} injection
+     * @param injectionFramework the {@link InjectionFramework} to use for {@link build.codemodel.dependency.injection.Dependency} injection
      * @param transport          the {@link HttpTransport} for communicating with the Docker Engine
      * @param configuration      the {@link Configuration}
      */

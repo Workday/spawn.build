@@ -21,7 +21,7 @@ package build.spawn.docker.jdk;
  */
 
 import build.base.configuration.Configuration;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.InjectionFramework;
 import build.spawn.docker.Session;
 import jakarta.inject.Inject;
 

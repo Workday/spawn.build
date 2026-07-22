@@ -6,7 +6,7 @@ import build.base.configuration.ConfigurationBuilder;
 import build.base.configuration.Option;
 import build.base.naming.UniqueNameGenerator;
 import build.codemodel.foundation.naming.NonCachingNameProvider;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.InjectionFramework;
 import build.codemodel.jdk.JDKCodeModel;
 import build.spawn.docker.Container;
 import build.spawn.docker.DockerContextBuilder;

@@ -27,7 +27,7 @@ import build.base.json.JsonObject;
 import build.base.json.JsonValue;
 import build.base.naming.UniqueNameGenerator;
 import build.base.option.HostName;
-import build.codemodel.injection.Context;
+import build.codemodel.dependency.injection.Context;
 import build.spawn.docker.Container;
 import build.spawn.docker.Image;
 import build.spawn.docker.jdk.HttpTransport;

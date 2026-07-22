@@ -22,7 +22,7 @@ package build.spawn.docker.jdk.model;
 
 import build.base.configuration.Configuration;
 import build.base.json.JsonString;
-import build.codemodel.injection.Context;
+import build.codemodel.dependency.injection.Context;
 import build.spawn.docker.Container;
 import build.spawn.docker.Image;
 import build.spawn.docker.jdk.command.CreateContainer;

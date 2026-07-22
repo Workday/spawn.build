@@ -29,7 +29,7 @@ open module build.spawn.docker.jdk {
 
     requires build.codemodel.foundation;
     requires build.codemodel.jdk;
-    requires build.codemodel.injection;
+    requires build.codemodel.dependency.injection;
 
     requires transitive build.base.naming;
 
