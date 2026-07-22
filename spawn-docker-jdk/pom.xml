@@ -63,7 +63,7 @@
 
         <dependency>
             <groupId>build.codemodel</groupId>
-            <artifactId>dependency-injection</artifactId>
+            <artifactId>codemodel-dependency-injection</artifactId>
         </dependency>
 
 
@@ -97,7 +97,7 @@
 
         <dependency>
             <groupId>build.codemodel</groupId>
-            <artifactId>jdk-codemodel</artifactId>
+            <artifactId>codemodel-jdk</artifactId>
         </dependency>
 
         <dependency>
@@ -134,7 +134,7 @@
                 <configuration>
                     <ignoredNonTestScopedDependencies>
                         <ignoredNonTestScopedDependency>build.codemodel:codemodel-foundation</ignoredNonTestScopedDependency>
-                        <ignoredNonTestScopedDependency>build.codemodel:jdk-codemodel</ignoredNonTestScopedDependency>
+                        <ignoredNonTestScopedDependency>build.codemodel:codemodel-jdk</ignoredNonTestScopedDependency>
                     </ignoredNonTestScopedDependencies>
                 </configuration>
             </plugin>

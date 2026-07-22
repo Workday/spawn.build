@@ -36,7 +36,7 @@ open module build.spawn.application {
     requires transitive build.base.network;
     requires transitive build.base.option;
 
-    requires transitive build.codemodel.injection;
+    requires transitive build.codemodel.dependency.injection;
     requires transitive build.codemodel.jdk;
     requires transitive build.codemodel.foundation;
 

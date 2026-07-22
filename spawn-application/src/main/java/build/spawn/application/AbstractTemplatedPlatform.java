@@ -35,11 +35,11 @@ import build.base.network.Server;
 import build.base.option.TemporaryDirectory;
 import build.base.option.WorkingDirectory;
 import build.base.table.Table;
+import build.codemodel.dependency.injection.ConfigurationResolver;
+import build.codemodel.dependency.injection.Context;
+import build.codemodel.dependency.injection.InjectionFramework;
 import build.codemodel.foundation.naming.CachingNameProvider;
 import build.codemodel.foundation.naming.NonCachingNameProvider;
-import build.codemodel.injection.ConfigurationResolver;
-import build.codemodel.injection.Context;
-import build.codemodel.injection.InjectionFramework;
 import build.codemodel.jdk.JDKCodeModel;
 import build.spawn.application.option.LaunchIdentity;
 

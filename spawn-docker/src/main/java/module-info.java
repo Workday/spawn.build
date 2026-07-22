@@ -30,7 +30,7 @@ module build.spawn.docker {
     requires build.base.io;
     requires build.base.flow;
 
-    requires transitive build.codemodel.injection;
+    requires transitive build.codemodel.dependency.injection;
 
     exports build.spawn.docker;
     exports build.spawn.docker.option;

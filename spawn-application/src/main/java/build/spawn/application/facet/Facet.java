@@ -22,7 +22,7 @@ package build.spawn.application.facet;
 
 import build.base.configuration.CollectedOption;
 import build.base.foundation.Preconditions;
-import build.codemodel.injection.Context;
+import build.codemodel.dependency.injection.Context;
 
 import java.util.List;
 import java.util.Objects;

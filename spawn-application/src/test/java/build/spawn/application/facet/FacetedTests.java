@@ -2,7 +2,7 @@ package build.spawn.application.facet;
 
 import build.base.foundation.iterator.matching.IteratorPatternMatchers;
 import build.codemodel.foundation.naming.NonCachingNameProvider;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.InjectionFramework;
 import build.codemodel.jdk.JDKCodeModel;
 import build.spawn.application.facet.facets.Address;
 import build.spawn.application.facet.facets.Hobbies;

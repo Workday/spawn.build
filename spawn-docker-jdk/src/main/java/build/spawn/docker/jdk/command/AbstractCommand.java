@@ -20,7 +20,7 @@ package build.spawn.docker.jdk.command;
  * #L%
  */
 
-import build.codemodel.injection.Context;
+import build.codemodel.dependency.injection.Context;
 import build.spawn.docker.jdk.HttpTransport;
 import jakarta.inject.Inject;
 

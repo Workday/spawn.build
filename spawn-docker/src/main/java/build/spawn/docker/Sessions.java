@@ -22,7 +22,7 @@ package build.spawn.docker;
 
 import build.base.configuration.Configuration;
 import build.base.configuration.Option;
-import build.codemodel.injection.InjectionFramework;
+import build.codemodel.dependency.injection.InjectionFramework;
 
 import java.util.Objects;
 import java.util.Optional;

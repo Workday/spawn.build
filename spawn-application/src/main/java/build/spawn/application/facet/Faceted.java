@@ -20,7 +20,7 @@ package build.spawn.application.facet;
  * #L%
  */
 
-import build.codemodel.injection.Context;
+import build.codemodel.dependency.injection.Context;
 
 import java.util.Optional;
 
